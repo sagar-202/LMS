@@ -36,8 +36,8 @@ export const calculateVideoNavigation = (
         return { previous_video_id: null, next_video_id: null };
     }
 
-    const previous_video_id = currentIndex > 0 ? sorted[currentIndex - 1].id : null;
-    const next_video_id = currentIndex < sorted.length - 1 ? sorted[currentIndex + 1].id : null;
+    const previous_video_id = currentIndex > 0 ? sorted[currentIndex - 1]?.id ?? null : null;
+    const next_video_id = currentIndex < sorted.length - 1 ? sorted[currentIndex + 1]?.id ?? null : null;
 
     return { previous_video_id, next_video_id };
 };

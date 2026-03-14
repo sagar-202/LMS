@@ -20,7 +20,7 @@ export class VideosRepository {
     async getVideoById(videoId: number): Promise<VideoRecord | null> {
         const query = 'SELECT * FROM videos WHERE id = ? LIMIT 1';
         const [rows] = await db.query<RowDataPacket[]>(query, [videoId]);
-        if (rows.length === 0) return null;
+        if (!rows || rows.length === 0) return null;
         return rows[0] as VideoRecord;
     }
 
@@ -60,8 +60,8 @@ export class VideosRepository {
       LIMIT 1
     `;
         const [rows] = await db.query<RowDataPacket[]>(query, [videoId]);
-        if (rows.length === 0) return null;
-        return rows[0].subject_id;
+        if (!rows || rows.length === 0) return null;
+        return rows[0]?.subject_id ?? null;
     }
 }
 

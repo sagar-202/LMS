@@ -7,10 +7,11 @@ import { User } from '../users/repository';
 
 export class AuthService {
     private generateAccessToken(user: User): string {
+        const secret: jwt.Secret = env.JWT_SECRET;
         return jwt.sign(
             { userId: user.id, email: user.email },
-            env.JWT_SECRET,
-            { expiresIn: env.JWT_EXPIRES_IN } // 15m
+            secret,
+            { expiresIn: env.JWT_EXPIRES_IN as any } // 15m
         );
     }
 
@@ -91,11 +92,10 @@ export class AuthService {
         }
 
         // Optional: We do not strictly need the full user record here, but we should fetch it to generate a new access token
-        const [rows] = await import('../../config/db').then((m) =>
-            m.default.query<import('mysql2').RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [tokenRecord.user_id])
-        );
+        const dbPool = require('../../config/db').default;
+        const [rows] = await dbPool.query('SELECT * FROM users WHERE id = ?', [tokenRecord.user_id]);
 
-        const user = rows[0] as User;
+        const user = (rows as import('mysql2').RowDataPacket[])[0] as User;
         if (!user) {
             throw { statusCode: 401, message: 'User associated with token not found' };
         }

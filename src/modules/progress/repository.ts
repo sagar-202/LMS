@@ -16,7 +16,7 @@ export class ProgressRepository {
     async getVideoProgress(userId: number, videoId: number): Promise<VideoProgress | null> {
         const query = 'SELECT * FROM video_progress WHERE user_id = ? AND video_id = ? LIMIT 1';
         const [rows] = await db.query<RowDataPacket[]>(query, [userId, videoId]);
-        if (rows.length === 0) return null;
+        if (!rows || rows.length === 0) return null;
         return rows[0] as VideoProgress;
     }
 
@@ -70,8 +70,8 @@ export class ProgressRepository {
     `;
 
         const [rows] = await db.query<RowDataPacket[]>(query, [userId, subjectId]);
-        if (rows.length === 0) return null;
-        return rows[0];
+        if (!rows || rows.length === 0) return null;
+        return rows[0] ?? null;
     }
 }
 

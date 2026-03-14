@@ -8,12 +8,13 @@ export class VideosController {
      */
     getVideo = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const videoId = parseInt(req.params.videoId, 10);
+            const userId = parseInt((req.header('X-User-Id') as string) || '1', 10);
+            const videoId = parseInt(req.params.videoId as string, 10);
             if (isNaN(videoId)) {
                 return res.status(400).json({ message: 'Invalid video ID parameter' });
             }
 
-            const payload = await videosService.getVideoWithNavigation(videoId);
+            const payload = await videosService.getVideoWithNavigation(videoId, userId);
             res.status(200).json(payload);
         } catch (error) {
             next(error);

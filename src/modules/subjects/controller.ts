@@ -22,7 +22,7 @@ export class SubjectsController {
      */
     getById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const subjectId = parseInt(req.params.subjectId, 10);
+            const subjectId = parseInt(req.params.subjectId as string, 10);
             if (isNaN(subjectId)) {
                 return res.status(400).json({ message: 'Invalid subject ID parameter' });
             }
@@ -40,12 +40,13 @@ export class SubjectsController {
      */
     getTree = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const subjectId = parseInt(req.params.subjectId, 10);
+            const userId = parseInt((req.header('X-User-Id') as string) || '1', 10);
+            const subjectId = parseInt(req.params.subjectId as string, 10);
             if (isNaN(subjectId)) {
                 return res.status(400).json({ message: 'Invalid subject ID parameter' });
             }
 
-            const tree = await subjectsService.getSubjectTree(subjectId);
+            const tree = await subjectsService.getSubjectTree(subjectId, userId);
             res.status(200).json(tree);
         } catch (error) {
             next(error);
