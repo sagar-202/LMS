@@ -13,5 +13,7 @@ export const env = {
     DB_PASSWORD: process.env.DB_PASSWORD || '',
     DB_NAME: process.env.DB_NAME || 'lms_db',
     JWT_SECRET: process.env.JWT_SECRET || 'super_secret_jwt_key',
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1d',
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
+    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'super_secret_refresh_key',
+    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
 };

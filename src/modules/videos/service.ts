@@ -1,0 +1,48 @@
+import { videosRepository } from './repository';
+import { calculateVideoNavigation, OrderedVideo } from '../../utils/ordering';
+
+export class VideosService {
+    /**
+     * Fetch a single video by ID, along with dynamically resolved next & previous links
+     * structured flatly.
+     */
+    async getVideoWithNavigation(videoId: number) {
+        // 1. Fetch the core video
+        const video = await videosRepository.getVideoById(videoId);
+        if (!video) {
+            throw { statusCode: 404, message: 'Video not found' };
+        }
+
+        // 2. Discover which subject this video belongs to
+        const subjectId = await videosRepository.getSubjectIdForVideo(videoId);
+        if (!subjectId) {
+            throw { statusCode: 404, message: 'Subject linkage missing. Video is orphaned.' };
+        }
+
+        // 3. Fetch flat ordered context for this subject
+        const subjectVideoContext = await videosRepository.getAllVideosBySubject(subjectId);
+
+        // Convert DB output safely
+        const allOrderedVideos: OrderedVideo[] = subjectVideoContext.map(v => ({
+            id: v.id,
+            section_id: v.section_id,
+            section_order: v.section_order,
+            video_order: v.video_order
+        }));
+
+        // 4. Calculate relative neighbors
+        const { next_video_id, previous_video_id } = calculateVideoNavigation(allOrderedVideos, videoId);
+
+        // 5. Build and return precisely what the client needs
+        return {
+            id: video.id,
+            title: video.title,
+            description: video.description,
+            youtube_video_id: video.youtube_video_id,
+            previous_video_id,
+            next_video_id
+        };
+    }
+}
+
+export const videosService = new VideosService();
