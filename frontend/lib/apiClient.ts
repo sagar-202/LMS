@@ -1,33 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { useAuthStore } from './authStore';
 
-/**
- * Helper to get the access token from localStorage
- * Safe to call on the server (returns null)
- */
-const getAccessToken = () => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem('accessToken');
-    }
-    return null;
-};
-
-/**
- * Helper to set the access token in localStorage
- */
-const setAccessToken = (token: string) => {
-    if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', token);
-    }
-};
-
-/**
- * Helper to remove the access token in localStorage
- */
-const removeAccessToken = () => {
-    if (typeof window !== 'undefined') {
-        localStorage.removeItem('accessToken');
-    }
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
 let isRefreshing = false;
 let refreshSubscribers: ((accessToken: string) => void)[] = [];
@@ -41,36 +14,38 @@ const onRefreshed = (accessToken: string) => {
     refreshSubscribers = [];
 };
 
-export async function apiClient<T>(
-    endpoint: string,
-    options: RequestInit = {}
-): Promise<T> {
-    const url = `${API_URL}${endpoint}`;
+export async function apiFetch<T = any>(url: string, options: RequestInit = {}): Promise<T> {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
 
     const headers = new Headers(options.headers);
-    headers.set('Content-Type', 'application/json');
-
-    const token = getAccessToken();
-    if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
+    if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+        headers.set('Content-Type', 'application/json');
     }
 
-    // Include credentials for the refresh token cookie
+    // Access token should be stored in Zustand authStore
+    const { accessToken, clearAuth, setAccessToken } = useAuthStore.getState();
+
+    // Automatically attach Authorization header with access token
+    if (accessToken) {
+        headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+
     const config: RequestInit = {
         ...options,
         headers,
-        credentials: 'include',
+        credentials: 'include', // Ensures cookies (e.g. refresh token) are sent
     };
 
-    let response = await fetch(url, config);
+    let response = await fetch(fullUrl, config);
 
-    // If unauthorized, attempt to refresh the token
+    // If the backend returns 401:
     if (response.status === 401) {
         if (!isRefreshing) {
             isRefreshing = true;
 
             try {
-                const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
+                // call POST /api/auth/refresh
+                const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -78,42 +53,50 @@ export async function apiClient<T>(
 
                 if (refreshResponse.ok) {
                     const data = await refreshResponse.json();
-                    setAccessToken(data.accessToken);
-                    isRefreshing = false;
-                    onRefreshed(data.accessToken);
+                    const newAccessToken = data.accessToken;
+                    setAccessToken(newAccessToken);
 
-                    // Retry the original request
-                    headers.set('Authorization', `Bearer ${data.accessToken}`);
-                    config.headers = headers;
-                    response = await fetch(url, config);
-                } else {
-                    // Refresh failed, user is logged out
-                    removeAccessToken();
                     isRefreshing = false;
-                    onRefreshed('');
-                    if (typeof window !== 'undefined') {
-                        window.location.href = '/auth/login';
-                    }
-                    throw new Error('Session expired');
+                    onRefreshed(newAccessToken);
+
+                    // retry the original request once
+                    headers.set('Authorization', `Bearer ${newAccessToken}`);
+                    config.headers = headers;
+                    response = await fetch(fullUrl, config);
+                } else {
+                    throw new Error('Refresh failed');
                 }
             } catch (error) {
+                // If refresh fails: clear auth state, redirect user to /auth/login
                 isRefreshing = false;
-                removeAccessToken();
+                clearAuth();
+                onRefreshed('');
                 if (typeof window !== 'undefined') {
                     window.location.href = '/auth/login';
                 }
-                throw error;
+                throw new Error('Session expired');
             }
         } else {
-            // Wait for the token refresh to complete, then retry
-            return new Promise((resolve) => {
+            // Wait for the active refresh to complete
+            return new Promise<T>((resolve, reject) => {
                 subscribeTokenRefresh(async (newToken: string) => {
                     if (newToken) {
                         headers.set('Authorization', `Bearer ${newToken}`);
                         config.headers = headers;
-                        const retryResponse = await fetch(url, config);
-                        const retryData = await retryResponse.json();
-                        resolve(retryData);
+                        try {
+                            const retryResponse = await fetch(fullUrl, config);
+                            if (!retryResponse.ok) {
+                                const errorData = await retryResponse.json().catch(() => ({}));
+                                reject(new Error(errorData.message || 'API request failed'));
+                            } else {
+                                const retryData: T = await retryResponse.json();
+                                resolve(retryData);
+                            }
+                        } catch (err) {
+                            reject(err);
+                        }
+                    } else {
+                        reject(new Error('Session expired'));
                     }
                 });
             });
@@ -125,5 +108,17 @@ export async function apiClient<T>(
         throw new Error(errorData.message || 'API request failed');
     }
 
-    return response.json();
+    // Return JSON automatically
+    return response.json() as Promise<T>;
+}
+
+export async function get<T = any>(url: string): Promise<T> {
+    return apiFetch<T>(url, { method: 'GET' });
+}
+
+export async function post<T = any>(url: string, body: any): Promise<T> {
+    return apiFetch<T>(url, {
+        method: 'POST',
+        body: JSON.stringify(body),
+    });
 }

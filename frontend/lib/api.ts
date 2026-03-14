@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiFetch } from './apiClient';
 
 export interface Subject {
     id: number;
@@ -45,19 +45,19 @@ export interface VideoProgress {
 }
 
 export const lmsApi = {
-    getSubjects: () => apiClient<Subject[]>('/subjects'),
+    getSubjects: () => apiFetch<Subject[]>('/subjects'),
 
     getSubjectTree: (subjectId: number | string) =>
-        apiClient<SubjectTree>(`/subjects/${subjectId}/tree`),
+        apiFetch<SubjectTree>(`/subjects/${subjectId}/tree`),
 
     getVideo: (videoId: number | string) =>
-        apiClient<VideoDetail>(`/videos/${videoId}`),
+        apiFetch<VideoDetail>(`/videos/${videoId}`),
 
     getVideoProgress: (videoId: number | string) =>
-        apiClient<VideoProgress>(`/progress/videos/${videoId}`),
+        apiFetch<VideoProgress>(`/progress/videos/${videoId}`),
 
     updateVideoProgress: (videoId: number | string, data: Partial<VideoProgress>) =>
-        apiClient<void>(`/progress/videos/${videoId}`, {
+        apiFetch<void>(`/progress/videos/${videoId}`, {
             method: 'POST',
             body: JSON.stringify(data),
         }),
