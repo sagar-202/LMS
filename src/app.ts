@@ -15,7 +15,7 @@ const app: Application = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
+  origin: ['http://localhost:3001', 'http://127.0.0.1:3001', 'https://lms-ten-iota.vercel.app'],
   credentials: true
 }));
 app.use(express.json());
