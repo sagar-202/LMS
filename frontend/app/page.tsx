@@ -2,25 +2,50 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { lmsApi, Subject } from '@/lib/api';
+import { lmsApi, Subject, SubjectProgress } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+
+interface SubjectWithProgress extends Subject {
+  progress?: SubjectProgress;
+}
 
 export default function Home() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjectsWithProgress, setSubjectsWithProgress] = useState<SubjectWithProgress[]>([]);
   const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
-    lmsApi.getSubjects()
-      .then(data => {
-        setSubjects(data);
-        setFilteredSubjects(data);
-      })
-      .catch(err => console.error('Failed to fetch subjects:', err))
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const subjectsData = await lmsApi.getSubjects();
+        setSubjects(subjectsData);
+        setFilteredSubjects(subjectsData);
+
+        if (isAuthenticated) {
+          // Fetch progress for all subjects to find the last watched and calculate analytics
+          const progressPromises = subjectsData.map(async (s) => {
+            try {
+              const p = await lmsApi.getSubjectProgress(s.id);
+              return { ...s, progress: p };
+            } catch {
+              return { ...s, progress: { total_videos: 0, completed_videos: 0, percent_complete: 0, last_video_id: null } };
+            }
+          });
+          const results = await Promise.all(progressPromises);
+          setSubjectsWithProgress(results);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isAuthenticated]);
 
   const filterByCategory = (category: string) => {
     setActiveCategory(category);
@@ -33,11 +58,130 @@ export default function Home() {
 
   const categories = ['All', 'Frontend', 'Backend', 'Data', 'DevOps'];
 
+  // Analytics Calculations
+  const coursesInProgress = subjectsWithProgress.filter(s => (s.progress?.percent_complete || 0) > 0 && (s.progress?.percent_complete || 0) < 100).length;
+  const lessonsCompleted = subjectsWithProgress.reduce((acc, s) => acc + (s.progress?.completed_videos || 0), 0);
+  const totalLessons = subjectsWithProgress.reduce((acc, s) => acc + (s.progress?.total_videos || 0), 0);
+
+  // Find the most recently active subject (closest to the top in the database usually means latest seeded, 
+  // but we'll just pick one with progress for now as we don't have last_watched_at in API)
+  const continueLearningSubject = subjectsWithProgress
+    .filter(s => (s.progress?.percent_complete || 0) > 0 && (s.progress?.percent_complete || 0) < 100)
+    .sort((a, b) => (b.id - a.id))[0]; // fallback sorting by ID for now
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 lg:p-12 space-y-12">
+        <div className="h-40 bg-gray-50 rounded-3xl animate-pulse"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>)}
+        </div>
+        <div className="h-64 bg-gray-50 rounded-[3rem] animate-pulse"></div>
+      </div>
+    );
+  }
+
+  // Dashboard View for Authenticated Users
+  if (isAuthenticated) {
+    return (
+      <main className="min-h-screen bg-gray-50/30 pb-20 pt-24">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          {/* Section 1: Welcome Header */}
+          <header className="mb-12">
+            <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-tight mb-2">
+              Welcome back, <span className="text-blue-600">{user?.name}</span>
+            </h1>
+            <p className="text-lg text-gray-500 font-medium">Continue building your skills.</p>
+          </header>
+
+          {/* Section 2: Analytics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Courses in Progress</p>
+              <div className="flex items-end gap-3">
+                <span className="text-4xl font-black text-gray-900 leading-none">{coursesInProgress}</span>
+                <span className="text-sm font-bold text-blue-600 mb-1">Active</span>
+              </div>
+            </div>
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Lessons Completed</p>
+              <div className="flex items-end gap-3">
+                <span className="text-4xl font-black text-gray-900 leading-none">{lessonsCompleted}</span>
+                <span className="text-sm font-bold text-emerald-500 mb-1">Finished</span>
+              </div>
+            </div>
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Total Lessons Available</p>
+              <div className="flex items-end gap-3">
+                <span className="text-4xl font-black text-gray-900 leading-none">{totalLessons}</span>
+                <span className="text-sm font-bold text-gray-400 mb-1">Total</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Continue Learning */}
+          {continueLearningSubject && (
+            <section className="mb-20">
+              <h2 className="text-2xl font-black text-gray-900 mb-8 tracking-tight">Continue Learning</h2>
+              <div className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-xl shadow-blue-500/5 flex flex-col md:flex-row items-center gap-10">
+                <div className="w-full md:w-1/3 aspect-video rounded-3xl overflow-hidden bg-gray-100">
+                  <img
+                    src={`https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop`}
+                    alt={continueLearningSubject.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 space-y-6">
+                  <div>
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4">RESUME COURSE</span>
+                    <h3 className="text-3xl font-black text-gray-900 leading-tight mb-2">{continueLearningSubject.title}</h3>
+                    <p className="text-gray-500 font-medium line-clamp-2">{continueLearningSubject.description}</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-xs font-black uppercase tracking-widest text-gray-400">
+                      <span>Course Progress</span>
+                      <span className="text-blue-600">{continueLearningSubject.progress?.percent_complete}%</span>
+                    </div>
+                    <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                      <div
+                        className="bg-blue-600 h-full transition-all duration-1000 ease-out rounded-full"
+                        style={{ width: `${continueLearningSubject.progress?.percent_complete}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/subjects/${continueLearningSubject.id}`}
+                    className="inline-flex px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25 hover:scale-105 active:scale-95"
+                  >
+                    Resume Lesson
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Section 4: Recommended Courses */}
+          <section>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Recommended for you</h2>
+              <Link href="/courses" className="text-blue-600 font-black text-xs uppercase tracking-widest hover:underline">View All Curriculum</Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {subjects.slice(0, 3).map((subject) => (
+                <CourseCard key={subject.id} subject={subject} />
+              ))}
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  // Landing Page for Guest Users
   return (
     <main className="min-h-screen bg-transparent">
       {/* Hero Section */}
       <section className="relative pt-24 pb-20 lg:pt-32 lg:pb-32 overflow-hidden">
-        {/* Subtle Background Gradient */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-white to-white opacity-70"></div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
 
@@ -60,10 +204,10 @@ export default function Home() {
               Browse Courses
             </button>
             <Link
-              href="/profile"
+              href="/auth/login"
               className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 font-black rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all shadow-sm hover:scale-105 active:scale-95"
             >
-              Continue Learning
+              Start Learning Now
             </Link>
           </div>
         </div>
@@ -82,8 +226,8 @@ export default function Home() {
                     key={cat}
                     onClick={() => filterByCategory(cat)}
                     className={`px-6 py-2.5 rounded-2xl text-sm font-black tracking-widest uppercase transition-all duration-300 ${activeCategory === cat
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2'
-                        : 'bg-white text-gray-400 border border-gray-100 hover:border-gray-300 hover:text-gray-900'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2'
+                      : 'bg-white text-gray-400 border border-gray-100 hover:border-gray-300 hover:text-gray-900'
                       }`}
                   >
                     {cat}
@@ -102,82 +246,11 @@ export default function Home() {
           </div>
         </header>
 
-        {loading ? (
+        {filteredSubjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-white rounded-[2.5rem] h-[450px] animate-pulse border border-gray-100 shadow-sm"></div>
+            {filteredSubjects.map((subject) => (
+              <CourseCard key={subject.id} subject={subject} />
             ))}
-          </div>
-        ) : filteredSubjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredSubjects.map((subject, index) => {
-              // Determine difficulty and lessons based on title/index for realism
-              const isBeginner = subject.title.toLowerCase().includes('beginner') || subject.title.toLowerCase().includes('fundamentals') || index % 2 === 0;
-              const lessonCount = [3, 3, 3, 3, 2, 2, 2, 2][index] || 4; // Use realistic counts for our seeded data
-              const thumbKeyword = subject.title.split(' ')[0].toLowerCase();
-              const thumbUrl = `https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop`; // High quality tech default
-
-              // More specific placeholders based on course
-              const thumbnails: Record<string, string> = {
-                'javascript': 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=600&auto=format&fit=crop',
-                'react': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=600&auto=format&fit=crop',
-                'python': 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop',
-                'node.js': 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=600&auto=format&fit=crop',
-                'sql': 'https://images.unsplash.com/photo-1544383023-53fafa015696?q=80&w=600&auto=format&fit=crop',
-                'system': 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
-                'machine': 'https://images.unsplash.com/photo-1555255707-c07966488a7b?q=80&w=600&auto=format&fit=crop',
-                'docker': 'https://images.unsplash.com/photo-1605745341112-85968b193ef5?q=80&w=600&auto=format&fit=crop',
-              };
-
-              const imageUrl = thumbnails[thumbKeyword] || thumbUrl;
-
-              return (
-                <Link
-                  key={subject.id}
-                  href={`/subjects/${subject.id}`}
-                  className="group bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-xl hover:shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)] transition-all duration-500 flex flex-col transform hover:-translate-y-2"
-                >
-                  {/* Thumbnail container */}
-                  <div className="h-56 relative overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={subject.title}
-                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                    <div className="absolute top-6 left-6">
-                      <div className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg ${isBeginner ? 'bg-emerald-500 text-white' : 'bg-blue-600 text-white'
-                        }`}>
-                        {isBeginner ? 'Beginner' : 'Intermediate'}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-10 flex flex-col flex-1">
-                    <h2 className="text-2xl font-black text-gray-900 mb-4 group-hover:text-blue-600 transition-colors leading-tight">
-                      {subject.title}
-                    </h2>
-                    <p className="text-gray-500 text-base mb-8 flex-1 leading-relaxed line-clamp-2 font-medium">
-                      {subject.description || 'Master this subject with our industry-led expert course curriculum.'}
-                    </p>
-
-                    <div className="flex items-center justify-between pt-8 border-t border-gray-50">
-                      <div className="flex items-center gap-2 text-gray-400 font-black text-xs uppercase tracking-widest">
-                        <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {lessonCount} Lessons
-                      </div>
-                      <div className="text-blue-600 font-bold group-hover:translate-x-1 transition-transform">
-                        Go to Course →
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
           </div>
         ) : (
           <div className="text-center py-32 bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-blue-500/5">
@@ -188,5 +261,50 @@ export default function Home() {
         )}
       </div>
     </main>
+  );
+}
+
+function CourseCard({ subject }: { subject: Subject }) {
+  const thumbKeyword = subject.title.split(' ')[0].toLowerCase();
+  const thumbnails: Record<string, string> = {
+    'javascript': 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=600&auto=format&fit=crop',
+    'react': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=600&auto=format&fit=crop',
+    'python': 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop',
+    'node.js': 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=600&auto=format&fit=crop',
+    'sql': 'https://images.unsplash.com/photo-1544383023-53fafa015696?q=80&w=600&auto=format&fit=crop',
+    'system': 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
+    'machine': 'https://images.unsplash.com/photo-1555255707-c07966488a7b?q=80&w=600&auto=format&fit=crop',
+    'docker': 'https://images.unsplash.com/photo-1605745341112-85968b193ef5?q=80&w=600&auto=format&fit=crop',
+  };
+
+  const imageUrl = thumbnails[thumbKeyword] || 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop';
+
+  return (
+    <Link
+      href={`/subjects/${subject.id}`}
+      className="group bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-xl hover:shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)] transition-all duration-500 flex flex-col transform hover:-translate-y-2"
+    >
+      <div className="h-56 relative overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={subject.title}
+          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+      </div>
+      <div className="p-10 flex flex-col flex-1">
+        <h2 className="text-2xl font-black text-gray-900 mb-4 group-hover:text-blue-600 transition-colors leading-tight">
+          {subject.title}
+        </h2>
+        <p className="text-gray-500 text-base mb-8 flex-1 leading-relaxed line-clamp-2 font-medium">
+          {subject.description || 'Master this subject with our industry-led expert course curriculum.'}
+        </p>
+        <div className="flex items-center justify-between pt-8 border-t border-gray-50">
+          <div className="text-blue-600 font-bold group-hover:translate-x-1 transition-transform">
+            Go to Course →
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

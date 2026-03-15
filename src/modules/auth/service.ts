@@ -9,7 +9,7 @@ export class AuthService {
     private generateAccessToken(user: User): string {
         const secret: jwt.Secret = env.JWT_SECRET;
         return jwt.sign(
-            { userId: user.id, email: user.email },
+            { userId: user.id, email: user.email, name: user.name },
             secret,
             { expiresIn: env.JWT_EXPIRES_IN as any } // 15m
         );
