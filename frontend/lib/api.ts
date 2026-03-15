@@ -6,6 +6,7 @@ export interface Subject {
     slug: string;
     description: string;
     category: string;
+    thumbnail?: string;
 }
 
 export interface VideoNode {

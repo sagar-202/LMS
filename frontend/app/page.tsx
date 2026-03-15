@@ -265,26 +265,15 @@ export default function Home() {
 }
 
 function CourseCard({ subject }: { subject: Subject }) {
-  const thumbKeyword = subject.title.split(' ')[0].toLowerCase();
-  const thumbnails: Record<string, string> = {
-    'javascript': 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=600&auto=format&fit=crop',
-    'react': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=600&auto=format&fit=crop',
-    'python': 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop',
-    'node.js': 'https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=600&auto=format&fit=crop',
-    'sql': 'https://images.unsplash.com/photo-1544383023-53fafa015696?q=80&w=600&auto=format&fit=crop',
-    'system': 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
-    'machine': 'https://images.unsplash.com/photo-1555255707-c07966488a7b?q=80&w=600&auto=format&fit=crop',
-    'docker': 'https://images.unsplash.com/photo-1605745341112-85968b193ef5?q=80&w=600&auto=format&fit=crop',
-  };
-
-  const imageUrl = thumbnails[thumbKeyword] || 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop';
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop';
+  const imageUrl = subject.thumbnail || fallbackImage;
 
   return (
     <Link
       href={`/subjects/${subject.id}`}
       className="group bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl dark:shadow-none hover:shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)] dark:hover:bg-gray-800 transition-all duration-500 flex flex-col transform hover:-translate-y-2"
     >
-      <div className="h-56 relative overflow-hidden">
+      <div className="aspect-video relative overflow-hidden rounded-t-xl">
         <img
           src={imageUrl}
           alt={subject.title}
