@@ -55,7 +55,7 @@ export default function AppShell({ children }: AppShellProps) {
                             {[
                                 { name: 'Home', href: '/' },
                                 { name: 'Courses', href: '/#curriculum' },
-                                { name: 'Dashboard', href: '/profile' }
+                                { name: 'Dashboard', href: '/dashboard' }
                             ].map((item) => (
                                 <Link
                                     key={item.name}
@@ -111,14 +111,14 @@ export default function AppShell({ children }: AppShellProps) {
                                                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user?.email}</p>
                                                 </div>
                                                 <Link
-                                                    href="/profile"
+                                                    href="/dashboard"
                                                     className="flex items-center gap-3 px-6 py-4 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                                     onClick={() => setDropdownOpen(false)}
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                     </svg>
-                                                    My Profile
+                                                    My Dashboard
                                                 </Link>
                                                 <button
                                                     onClick={handleLogout}

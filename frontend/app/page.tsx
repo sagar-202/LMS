@@ -59,15 +59,13 @@ export default function Home() {
   const categories = ['All', 'Frontend', 'Backend', 'Data', 'DevOps'];
 
   // Analytics Calculations
-  const coursesInProgress = subjectsWithProgress.filter(s => (s.progress?.percent_complete || 0) > 0 && (s.progress?.percent_complete || 0) < 100).length;
+  const activeCourses = subjectsWithProgress.filter(s => (s.progress?.percent_complete || 0) > 0 && (s.progress?.percent_complete || 0) < 100);
+  const coursesInProgress = activeCourses.length;
   const lessonsCompleted = subjectsWithProgress.reduce((acc, s) => acc + (s.progress?.completed_videos || 0), 0);
   const totalLessons = subjectsWithProgress.reduce((acc, s) => acc + (s.progress?.total_videos || 0), 0);
 
-  // Find the most recently active subject (closest to the top in the database usually means latest seeded, 
-  // but we'll just pick one with progress for now as we don't have last_watched_at in API)
-  const continueLearningSubject = subjectsWithProgress
-    .filter(s => (s.progress?.percent_complete || 0) > 0 && (s.progress?.percent_complete || 0) < 100)
-    .sort((a, b) => (b.id - a.id))[0]; // fallback sorting by ID for now
+  // Find the most recently active subject
+  const continueLearningSubject = activeCourses.sort((a, b) => (b.id - a.id))[0];
 
   if (loading) {
     return (
@@ -150,7 +148,9 @@ export default function Home() {
                     </div>
                   </div>
                   <Link
-                    href={`/subjects/${continueLearningSubject.id}`}
+                    href={continueLearningSubject.progress?.last_video_id
+                      ? `/subjects/${continueLearningSubject.id}/video/${continueLearningSubject.progress.last_video_id}`
+                      : `/subjects/${continueLearningSubject.id}`}
                     className="inline-flex px-10 py-4 bg-blue-600 dark:bg-white dark:text-gray-950 text-white font-black rounded-2xl hover:bg-blue-700 dark:hover:bg-gray-100 transition-all shadow-lg shadow-blue-500/25 dark:shadow-none hover:scale-105 active:scale-95 text-center justify-center min-w-[200px]"
                   >
                     Resume Lesson
