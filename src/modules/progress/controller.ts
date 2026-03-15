@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { progressService } from './service';
+import { AuthRequest } from '../../middleware/authHandler';
 
 export class ProgressController {
 
@@ -7,14 +8,14 @@ export class ProgressController {
      * GET /api/progress/videos/:videoId
      * Get progress for a specific video
      */
-    getVideoProgress = async (req: Request, res: Response, next: NextFunction) => {
+    getVideoProgress = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            // User ID would normally come from res.locals.user provided by an auth middleware.
-            // Since auth middleware wasn't strictly built into the routes yet, hardcode a mock user for now
-            // or assume it's passed via headers for the sake of the skeleton.
-            const userId = parseInt((req.header('X-User-Id') as string) || '1', 10);
-            const videoId = parseInt(req.params.videoId as string, 10);
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
 
+            const videoId = parseInt(req.params.videoId as string, 10);
             if (isNaN(videoId)) {
                 return res.status(400).json({ message: 'Invalid video ID parameter' });
             }
@@ -30,11 +31,14 @@ export class ProgressController {
      * POST /api/progress/videos/:videoId
      * Upsert progress for a specific video
      */
-    updateVideoProgress = async (req: Request, res: Response, next: NextFunction) => {
+    updateVideoProgress = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const userId = parseInt((req.header('X-User-Id') as string) || '1', 10);
-            const videoId = parseInt(req.params.videoId as string, 10);
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
 
+            const videoId = parseInt(req.params.videoId as string, 10);
             if (isNaN(videoId)) {
                 return res.status(400).json({ message: 'Invalid video ID parameter' });
             }
@@ -53,11 +57,14 @@ export class ProgressController {
      * GET /api/progress/subjects/:subjectId
      * Get aggregated progress statistics for a subject
      */
-    getSubjectProgress = async (req: Request, res: Response, next: NextFunction) => {
+    getSubjectProgress = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const userId = parseInt((req.header('X-User-Id') as string) || '1', 10);
-            const subjectId = parseInt(req.params.subjectId as string, 10);
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
 
+            const subjectId = parseInt(req.params.subjectId as string, 10);
             if (isNaN(subjectId)) {
                 return res.status(400).json({ message: 'Invalid subject ID parameter' });
             }

@@ -5,6 +5,7 @@ export interface Subject {
     title: string;
     slug: string;
     description: string;
+    category: string;
 }
 
 export interface VideoNode {
@@ -25,6 +26,7 @@ export interface SectionNode {
 export interface SubjectTree {
     id: number;
     title: string;
+    description: string;
     sections: SectionNode[];
 }
 
@@ -33,6 +35,7 @@ export interface VideoDetail {
     title: string;
     description: string;
     youtube_video_id: string;
+    duration_seconds: number;
     previous_video_id: number | null;
     next_video_id: number | null;
     locked?: boolean;
@@ -44,11 +47,27 @@ export interface VideoProgress {
     is_completed: boolean;
 }
 
+export interface SubjectProgress {
+    total_videos: number;
+    completed_videos: number;
+    percent_complete: number;
+    last_video_id: number | null;
+}
+
 export const lmsApi = {
     getSubjects: () => apiFetch<Subject[]>('/subjects'),
 
+    getSubject: (subjectId: number | string) =>
+        apiFetch<Subject>(`/subjects/${subjectId}`),
+
+    getSmartResumeVideo: (subjectId: number | string) =>
+        apiFetch<{ video_id: number }>(`/subjects/${subjectId}/first-video`),
+
     getSubjectTree: (subjectId: number | string) =>
         apiFetch<SubjectTree>(`/subjects/${subjectId}/tree`),
+
+    getSubjectProgress: (subjectId: number | string) =>
+        apiFetch<SubjectProgress>(`/progress/subjects/${subjectId}`),
 
     getVideo: (videoId: number | string) =>
         apiFetch<VideoDetail>(`/videos/${videoId}`),

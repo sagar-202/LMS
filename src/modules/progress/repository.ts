@@ -48,30 +48,58 @@ export class ProgressRepository {
      * Complex query to compute overall subject progress dynamically for a specific user.
      */
     async getSubjectProgressStats(userId: number, subjectId: number): Promise<RowDataPacket | null> {
-        // 1. Get total video count for the subject
-        // 2. Join with video_progress to see how many are completed
-        // 3. Find latest interacted video/position
+        // Query to get totals and the "furthest reached" video progress
         const query = `
-      SELECT
-        COUNT(v.id) as total_videos,
-        COALESCE(SUM(CASE WHEN vp.is_completed = TRUE THEN 1 ELSE 0 END), 0) as completed_videos,
-        
-        -- To find the very last video they touched, order by progress update time (or completed time)
-        -- Since mysql doesn't have an easily extractable 'updated_at' on the junction naturally without schema tricks
-        -- We will grab the MAX(vp.video_id) where last_position > 0 or similar simple heuristic. 
-        -- Alternatively, order by sections/videos to find the furthest reached.
-        MAX(CASE WHEN vp.last_position_seconds > 0 OR vp.is_completed = 1 THEN vp.video_id ELSE NULL END) as last_video_id,
-        MAX(CASE WHEN vp.last_position_seconds > 0 OR vp.is_completed = 1 THEN vp.last_position_seconds ELSE 0 END) as last_position_seconds
+            SELECT 
+                COUNT(v.id) as total_videos,
+                SUM(CASE WHEN vp.is_completed = 1 THEN 1 ELSE 0 END) as completed_videos,
+                
+                -- Furthest Reached: The video in this subject with progress that has the highest order sequence
+                (
+                    SELECT vp2.video_id 
+                    FROM video_progress vp2
+                    JOIN videos v2 ON vp2.video_id = v2.id
+                    JOIN sections s2 ON v2.section_id = s2.id
+                    WHERE vp2.user_id = ? AND s2.subject_id = ?
+                    ORDER BY s2.order_index DESC, v2.order_index DESC
+                    LIMIT 1
+                ) as last_video_id,
+                
+                (
+                    SELECT vp3.last_position_seconds 
+                    FROM video_progress vp3
+                    JOIN videos v3 ON vp3.video_id = v3.id
+                    JOIN sections s3 ON v3.section_id = s3.id
+                    WHERE vp3.user_id = ? AND s3.subject_id = ?
+                    ORDER BY s3.order_index DESC, v3.order_index DESC
+                    LIMIT 1
+                ) as last_position_seconds
 
-      FROM videos v
-      JOIN sections s ON v.section_id = s.id
-      LEFT JOIN video_progress vp ON vp.video_id = v.id AND vp.user_id = ?
-      WHERE s.subject_id = ?
-    `;
+            FROM videos v
+            JOIN sections s ON v.section_id = s.id
+            LEFT JOIN video_progress vp ON vp.video_id = v.id AND vp.user_id = ?
+            WHERE s.subject_id = ?
+        `;
 
-        const [rows] = await db.query<RowDataPacket[]>(query, [userId, subjectId]);
+        const [rows] = await db.query<RowDataPacket[]>(query, [userId, subjectId, userId, subjectId, userId, subjectId]);
         if (!rows || rows.length === 0) return null;
         return rows[0] ?? null;
+    }
+
+    async getLastWatchedVideoInSubject(userId: number, subjectId: number): Promise<number | null> {
+        const query = `
+            SELECT vp.video_id
+            FROM video_progress vp
+            JOIN videos v ON vp.video_id = v.id
+            JOIN sections s ON v.section_id = s.id
+            WHERE vp.user_id = ? AND s.subject_id = ?
+            ORDER BY vp.updated_at DESC
+            LIMIT 1
+        `;
+        const [rows] = await db.query<RowDataPacket[]>(query, [userId, subjectId]);
+        const firstRow = rows[0] as RowDataPacket | undefined;
+        if (!firstRow) return null;
+        return firstRow.video_id;
     }
 }
 

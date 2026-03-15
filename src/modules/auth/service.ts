@@ -36,7 +36,9 @@ export class AuthService {
         // 1. Check if user already exists
         const existingUser = await authRepository.findUserByEmail(email);
         if (existingUser) {
-            throw { statusCode: 400, message: 'Email already in use' };
+            const error = new Error('Email already in use') as any;
+            error.statusCode = 400;
+            throw error;
         }
 
         // 2. Hash password
@@ -67,7 +69,9 @@ export class AuthService {
         // 2. Compare password
         const isPasswordValid = await bcrypt.compare(passwordRaw, user.password_hash);
         if (!isPasswordValid) {
-            throw { statusCode: 401, message: 'Invalid credentials' };
+            const error = new Error('Invalid credentials') as any;
+            error.statusCode = 401;
+            throw error;
         }
 
         // 3. Issue tokens
@@ -88,7 +92,9 @@ export class AuthService {
         // 2. Check DB for valid refresh token
         const tokenRecord = await authRepository.findRefreshToken(tokenHash);
         if (!tokenRecord) {
-            throw { statusCode: 401, message: 'Invalid or expired refresh token' };
+            const error = new Error('Invalid or expired refresh token') as any;
+            error.statusCode = 401;
+            throw error;
         }
 
         // Optional: We do not strictly need the full user record here, but we should fetch it to generate a new access token
@@ -97,7 +103,9 @@ export class AuthService {
 
         const user = (rows as import('mysql2').RowDataPacket[])[0] as User;
         if (!user) {
-            throw { statusCode: 401, message: 'User associated with token not found' };
+            const error = new Error('User associated with token not found') as any;
+            error.statusCode = 401;
+            throw error;
         }
 
         // 3. Issue new access token

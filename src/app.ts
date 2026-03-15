@@ -8,11 +8,15 @@ import authRoutes from './modules/auth/routes';
 import subjectsRoutes from './modules/subjects/routes';
 import videosRoutes from './modules/videos/routes';
 import progressRoutes from './modules/progress/routes';
+import healthRoutes from './modules/health/routes';
 
 const app: Application = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -27,6 +31,10 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/subjects', subjectsRoutes);
+app.use('/api/videos', videosRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/health', healthRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response, next: NextFunction) => {

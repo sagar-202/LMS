@@ -6,6 +6,7 @@ export interface Subject {
     title: string;
     slug: string;
     description: string;
+    category: string;
     is_published: boolean;
     created_at: Date;
     updated_at: Date;
@@ -62,6 +63,20 @@ export class SubjectsRepository {
 
         const [rows] = await db.query<RowDataPacket[]>(query, sectionIds);
         return rows as Video[];
+    }
+
+    async getFirstVideoOfSubject(subjectId: number): Promise<Video | null> {
+        const query = `
+      SELECT v.* 
+      FROM videos v
+      JOIN sections s ON v.section_id = s.id
+      WHERE s.subject_id = ?
+      ORDER BY s.order_index ASC, v.order_index ASC
+      LIMIT 1
+    `;
+        const [rows] = await db.query<RowDataPacket[]>(query, [subjectId]);
+        if (rows.length === 0) return null;
+        return rows[0] as Video;
     }
 }
 

@@ -1,6 +1,6 @@
-import { useAuthStore } from './authStore';
+import { useAuthStore } from '../store/authStore';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
 
 let isRefreshing = false;
 let refreshSubscribers: ((accessToken: string) => void)[] = [];
@@ -23,7 +23,7 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
     }
 
     // Access token should be stored in Zustand authStore
-    const { accessToken, clearAuth, setAccessToken } = useAuthStore.getState();
+    const { accessToken, setAccessToken } = useAuthStore.getState();
 
     // Automatically attach Authorization header with access token
     if (accessToken) {
@@ -69,7 +69,7 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
             } catch (error) {
                 // If refresh fails: clear auth state, redirect user to /auth/login
                 isRefreshing = false;
-                clearAuth();
+                useAuthStore.setState({ accessToken: null, user: null, isAuthenticated: false });
                 onRefreshed('');
                 if (typeof window !== 'undefined') {
                     window.location.href = '/auth/login';

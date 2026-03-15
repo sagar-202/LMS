@@ -4,6 +4,9 @@ import { RowDataPacket } from 'mysql2/promise';
 export interface VideoRecord {
     id: number;
     section_id: number;
+    section_title: string;
+    subject_id: number;
+    subject_title: string;
     title: string;
     description: string;
     youtube_video_id: string;
@@ -15,10 +18,21 @@ export interface VideoRecord {
 
 export class VideosRepository {
     /**
-     * Fetch a single video by its ID
+     * Fetch a single video by its ID with section and subject context
      */
     async getVideoById(videoId: number): Promise<VideoRecord | null> {
-        const query = 'SELECT * FROM videos WHERE id = ? LIMIT 1';
+        const query = `
+            SELECT 
+                v.*, 
+                s.title as section_title, 
+                sub.id as subject_id, 
+                sub.title as subject_title
+            FROM videos v
+            JOIN sections s ON v.section_id = s.id
+            JOIN subjects sub ON s.subject_id = sub.id
+            WHERE v.id = ? 
+            LIMIT 1
+        `;
         const [rows] = await db.query<RowDataPacket[]>(query, [videoId]);
         if (!rows || rows.length === 0) return null;
         return rows[0] as VideoRecord;

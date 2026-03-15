@@ -53,10 +53,17 @@ export class VideosService {
             title: video.title,
             description: video.description,
             youtube_video_id: video.youtube_video_id,
+            order_index: video.order_index,
+            duration_seconds: video.duration_seconds,
+            section_id: video.section_id,
+            section_title: video.section_title,
+            subject_id: video.subject_id,
+            subject_title: video.subject_title,
             previous_video_id,
             next_video_id,
             is_completed: currentProgress.is_completed,
-            locked: is_locked
+            locked: is_locked,
+            unlock_reason: is_locked ? 'Complete the previous lesson to unlock this one' : null
         };
     }
 }

@@ -1,14 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
 import { videosService } from './service';
+import { AuthRequest } from '../../middleware/authHandler';
 
 export class VideosController {
     /**
      * GET /api/videos/:videoId
      * Retrives metadata for a video along with previous_video_id and next_video_id
      */
-    getVideo = async (req: Request, res: Response, next: NextFunction) => {
+    getVideo = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const userId = parseInt((req.header('X-User-Id') as string) || '1', 10);
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
+
             const videoId = parseInt(req.params.videoId as string, 10);
             if (isNaN(videoId)) {
                 return res.status(400).json({ message: 'Invalid video ID parameter' });

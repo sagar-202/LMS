@@ -13,10 +13,13 @@ export class AuthController {
     }
 
     register = async (req: Request, res: Response, next: NextFunction) => {
+        console.log('--- Registration Request Received ---');
+        console.log('Body:', req.body);
         try {
             const { email, password, name } = req.body;
 
             if (!email || !password || !name) {
+                console.log('Validation failed: missing fields');
                 return res.status(400).json({ message: 'Email, password, and name are required' });
             }
 

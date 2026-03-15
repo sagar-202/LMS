@@ -1,10 +1,11 @@
 import app from './app';
 import { env } from './config/env';
+import { connectDB } from './config/db';
 
 const startServer = async () => {
     try {
-        // Here we would typically initialize database connection
-        // await db.connect();
+        // Initialize database connection
+        await connectDB();
 
         const PORT = env.PORT || 3000;
 

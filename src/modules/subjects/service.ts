@@ -1,6 +1,7 @@
 import { subjectsRepository, Subject } from './repository';
 import { calculateVideoNavigation, OrderedVideo } from '../../utils/ordering';
 import { progressService } from '../progress/service';
+import { progressRepository } from '../progress/repository';
 
 // DTO Interfaces for the Tree response
 export interface VideoNode {
@@ -116,6 +117,18 @@ export class SubjectsService {
         };
 
         return tree;
+    }
+
+    async getSmartResumeVideo(subjectId: number, userId: number): Promise<number | null> {
+        // 1. Try to get the last watched video in this subject
+        const lastWatchedId = await progressRepository.getLastWatchedVideoInSubject(userId, subjectId);
+        if (lastWatchedId) {
+            return lastWatchedId;
+        }
+
+        // 2. If no progress, get the first video of the subject
+        const firstVideo = await subjectsRepository.getFirstVideoOfSubject(subjectId);
+        return firstVideo ? firstVideo.id : null;
     }
 }
 

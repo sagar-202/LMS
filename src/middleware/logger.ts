@@ -7,6 +7,9 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
     const ip = req.ip || req.socket.remoteAddress;
 
     console.log(`[${timestamp}] ${method} ${url} - IP: ${ip}`);
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+    }
 
     // Track response time
     const start = Date.now();

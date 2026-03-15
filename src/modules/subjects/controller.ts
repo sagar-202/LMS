@@ -52,6 +52,33 @@ export class SubjectsController {
             next(error);
         }
     };
+
+    /**
+     * GET /api/subjects/:subjectId/first-video
+     * Determines the smartest video to start/resume for the user
+     */
+    getSmartResume = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = (req as any).user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'User not authenticated' });
+            }
+
+            const subjectId = parseInt(req.params.subjectId as string, 10);
+            if (isNaN(subjectId)) {
+                return res.status(400).json({ message: 'Invalid subject ID parameter' });
+            }
+
+            const videoId = await subjectsService.getSmartResumeVideo(subjectId, userId);
+            if (!videoId) {
+                return res.status(404).json({ message: 'No videos found for this subject' });
+            }
+
+            res.status(200).json({ video_id: videoId });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 export const subjectsController = new SubjectsController();
