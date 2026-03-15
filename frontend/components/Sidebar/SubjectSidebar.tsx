@@ -11,9 +11,9 @@ export default function SubjectSidebar({ tree }: SubjectSidebarProps) {
     const { progress } = useSidebarStore();
 
     return (
-        <div className="flex flex-col h-full bg-white">
-            <div className="p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 truncate">
+        <div className="flex flex-col h-full bg-white dark:bg-gray-950 transition-colors">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-900">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
                     {tree?.title || 'Loading Course...'}
                 </h2>
             </div>
