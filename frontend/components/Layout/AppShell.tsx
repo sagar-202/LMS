@@ -54,7 +54,7 @@ export default function AppShell({ children }: AppShellProps) {
                         <nav className="hidden md:flex items-center gap-10">
                             {[
                                 { name: 'Home', href: '/' },
-                                { name: 'Courses', href: '/#curriculum' },
+                                { name: 'Courses', href: '/courses' },
                                 { name: 'Dashboard', href: '/dashboard' }
                             ].map((item) => (
                                 <Link
