@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { lmsApi, Subject, SubjectProgress } from '@/lib/api';
@@ -12,8 +11,7 @@ interface EnrolledSubject extends Subject {
 }
 
 export default function ProfilePage() {
-    const { user, logout } = useAuthStore();
-    const router = useRouter();
+    const { user } = useAuthStore();
 
     const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>([]);
     const [loading, setLoading] = useState(true);
@@ -54,11 +52,6 @@ export default function ProfilePage() {
             fetchProfileData();
         }
     }, [user]);
-
-    const handleLogout = async () => {
-        await logout();
-        router.push('/auth/login');
-    };
 
     if (!user) return null;
 
@@ -114,7 +107,7 @@ export default function ProfilePage() {
                             <div className="text-7xl mb-8 leading-none">🚀</div>
                             <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Your learning journey starts here</h3>
                             <p className="text-gray-500 mb-10 max-w-sm mx-auto font-medium text-lg leading-relaxed">
-                                You haven't started any courses yet. Discover our top-rated lessons and master new skills.
+                                You haven&apos;t started any courses yet. Discover our top-rated lessons and master new skills.
                             </p>
                             <Link href="/" className="inline-flex items-center gap-3 px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl shadow-blue-500/20 transform hover:-translate-y-1 active:translate-y-0">
                                 Browse Courses

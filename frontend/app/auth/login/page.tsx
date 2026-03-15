@@ -19,8 +19,12 @@ export default function LoginPage() {
         try {
             await login(email, password);
             router.push('/');
-        } catch (err: any) {
-            setError(err.message || 'Login failed');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message || 'Login failed');
+            } else {
+                setError('Login failed');
+            }
         }
     };
 

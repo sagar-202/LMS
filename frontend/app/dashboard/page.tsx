@@ -22,7 +22,6 @@ export default function DashboardPage() {
     const [lastWatched, setLastWatched] = React.useState<LastWatchedProgress | null>(null);
     const [overallStats, setOverallStats] = React.useState<OverallStats>({ completed_lessons: 0, total_lessons: 0 });
     const [loading, setLoading] = React.useState(true);
-    const [enrolledIds, setEnrolledIds] = React.useState<number[]>([]);
 
     useEffect(() => {
         // Redirect to login if not authenticated and not loading
@@ -47,7 +46,6 @@ export default function DashboardPage() {
                 setLastWatched(lastWatchedData);
                 
                 const enrollmentIds = enrollmentData.data || [];
-                setEnrolledIds(enrollmentIds);
 
                 // Filter subjects to only those the user is enrolled in
                 const enrolledSubjects = subjects.filter((s: Subject) => enrollmentIds.includes(s.id));
@@ -216,6 +214,7 @@ export default function DashboardPage() {
                                     className="group bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-6 shadow-xl transition-all duration-300 flex flex-col gap-6 cursor-pointer hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(59,130,246,0.25)] hover:ring-2 hover:ring-blue-500/40 hover:border-blue-500"
                                 >
                                     <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={thumbnail || '/placeholder-course.jpg'}
                                             alt={course.title}
@@ -270,7 +269,7 @@ export default function DashboardPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">You haven't enrolled in any courses yet.</h3>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">You haven&apos;t enrolled in any courses yet.</h3>
                             <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-sm mx-auto">Explore our range of modern tech skills and start your first lesson today.</p>
                             <Link
                                 href="/courses"

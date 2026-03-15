@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import SubjectSidebar from '@/components/Sidebar/SubjectSidebar';
 import AuthGuard from '@/components/Auth/AuthGuard';

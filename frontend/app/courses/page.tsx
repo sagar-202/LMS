@@ -108,7 +108,7 @@ export default function CoursesPage() {
                     <div className="text-center py-32 bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-xl shadow-blue-500/5 dark:shadow-none">
                         <div className="text-7xl mb-8">🔍</div>
                         <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-4">No courses matched your search</h3>
-                        <p className="text-gray-400 dark:text-gray-500 font-medium max-w-sm mx-auto">We're constantly adding new skills. Check back soon for exciting updates.</p>
+                        <p className="text-gray-400 dark:text-gray-500 font-medium max-w-sm mx-auto">We&apos;re constantly adding new skills. Check back soon for exciting updates.</p>
                     </div>
                 )}
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { lmsApi, VideoDetail } from '@/lib/api';
@@ -58,17 +58,17 @@ export default function VideoLessonPage() {
     }, [videoId]);
 
     // Navigation handlers
-    const goToPrevious = () => {
+    const goToPrevious = useCallback(() => {
         if (video?.previous_video_id) {
             router.push(`/subjects/${subjectId}/video/${video.previous_video_id}`);
         }
-    };
+    }, [video?.previous_video_id, router, subjectId]);
 
-    const goToNext = () => {
+    const goToNext = useCallback(() => {
         if (video?.next_video_id) {
             router.push(`/subjects/${subjectId}/video/${video.next_video_id}`);
         }
-    };
+    }, [video?.next_video_id, router, subjectId]);
 
     // Keyboard Shortcuts
     useEffect(() => {
@@ -82,7 +82,7 @@ export default function VideoLessonPage() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [video, subjectId]);
+    }, [goToPrevious, goToNext]);
 
     if (loading) {
         return (

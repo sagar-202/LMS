@@ -14,6 +14,7 @@ const onRefreshed = (accessToken: string) => {
     refreshSubscribers = [];
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function apiFetch<T = any>(url: string, options: RequestInit = {}): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
 
@@ -67,7 +68,7 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
                 } else {
                     throw new Error('Refresh failed');
                 }
-            } catch (error) {
+            } catch {
                 // If refresh fails: clear auth state, redirect user to /auth/login
                 isRefreshing = false;
                 useAuthStore.setState({ accessToken: null, user: null, isAuthenticated: false });
@@ -124,10 +125,12 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
     return result as T;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function get<T = any>(url: string): Promise<T> {
     return apiFetch<T>(url, { method: 'GET' });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function post<T = any>(url: string, body: any): Promise<T> {
     return apiFetch<T>(url, {
         method: 'POST',

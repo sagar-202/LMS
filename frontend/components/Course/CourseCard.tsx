@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { lmsApi, Subject } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { getYoutubeThumbnail } from '@/lib/youtube';
@@ -47,6 +47,7 @@ export default function CourseCard({
             className="group bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xl transition-all duration-300 flex flex-col transform hover:-translate-y-1 cursor-pointer hover:shadow-[0_10px_40px_rgba(59,130,246,0.25)] hover:ring-2 hover:ring-blue-500/40 hover:border-blue-500"
         >
             <div className="aspect-video relative overflow-hidden rounded-t-xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={thumbnail || '/placeholder-course.jpg'}
                     alt={subject.title}

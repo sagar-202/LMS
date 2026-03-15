@@ -13,14 +13,12 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setTheme] = useState<Theme>('light');
-    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         // Hydrate React state by reading the actual DOM class applied by the layout script.
         // This guarantees React and the DOM are perfectly in sync and stops hydration flashes.
         const isDarkDom = document.documentElement.classList.contains('dark');
         setTheme(isDarkDom ? 'dark' : 'light');
-        setMounted(true);
     }, []);
 
     const toggleTheme = () => {

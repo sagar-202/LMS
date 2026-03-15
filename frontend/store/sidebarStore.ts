@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { lmsApi, SubjectTree, SubjectProgress } from '@/lib/api';
+import { SubjectTree, SubjectProgress } from '@/lib/api';
 
 interface SidebarState {
     tree: SubjectTree | null;

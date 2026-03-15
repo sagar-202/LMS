@@ -12,12 +12,12 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({
-    videoId,
     youtubeVideoId,
     startPositionSeconds = 0,
     onProgress,
     onCompleted
 }: VideoPlayerProps) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const playerRef = useRef<any>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const lastProgressReport = useRef<number>(Math.floor(startPositionSeconds));
@@ -32,7 +32,7 @@ export default function VideoPlayer({
                     onProgress(currentTime);
                     lastProgressReport.current = currentTime;
                 }
-            } catch (err) {
+            } catch {
                 // Silently handle cases where player might not be fully ready
             }
         }
@@ -52,7 +52,7 @@ export default function VideoPlayer({
                         onProgress(currentTime);
                         lastProgressReport.current = currentTime;
                     }
-                } catch (err) {
+                } catch {
                     // Ignore errors during interval if player is transitioning
                 }
             }, 1000); // Check every second for precision
