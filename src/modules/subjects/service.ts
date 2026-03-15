@@ -27,7 +27,10 @@ export interface SubjectTree extends Omit<Subject, 'is_published' | 'created_at'
 export class SubjectsService {
     async getAllPublishedSubjects() {
         const subjects = await subjectsRepository.getPublishedSubjects();
-        return subjects;
+        return subjects.map(s => ({
+            ...s,
+            youtube_url: s.first_video_id ? `https://www.youtube.com/watch?v=${s.first_video_id}` : null
+        }));
     }
 
     async getSubjectById(subjectId: number) {
@@ -113,6 +116,7 @@ export class SubjectsService {
             title: subject.title,
             slug: subject.slug,
             description: subject.description,
+            category: subject.category,
             sections: sectionNodes
         };
 

@@ -8,6 +8,7 @@ export interface Subject {
     description: string;
     category: string;
     is_published: boolean;
+    first_video_id?: string;
     created_at: Date;
     updated_at: Date;
 }
@@ -31,7 +32,18 @@ export interface Video {
 
 export class SubjectsRepository {
     async getPublishedSubjects(): Promise<Subject[]> {
-        const query = 'SELECT * FROM subjects WHERE is_published = TRUE ORDER BY created_at DESC';
+        const query = `
+            SELECT s.*, 
+                (SELECT v.youtube_video_id 
+                 FROM videos v 
+                 JOIN sections sec ON v.section_id = sec.id 
+                 WHERE sec.subject_id = s.id 
+                 ORDER BY sec.order_index ASC, v.order_index ASC 
+                 LIMIT 1) as first_video_id
+            FROM subjects s 
+            WHERE s.is_published = TRUE 
+            ORDER BY s.created_at DESC
+        `;
         const [rows] = await db.query<RowDataPacket[]>(query);
         return rows as Subject[];
     }

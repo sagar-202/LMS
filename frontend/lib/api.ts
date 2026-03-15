@@ -7,6 +7,7 @@ export interface Subject {
     description: string;
     category: string;
     thumbnail?: string;
+    youtube_url?: string;
 }
 
 export interface VideoNode {

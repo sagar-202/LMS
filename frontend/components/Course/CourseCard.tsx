@@ -1,11 +1,29 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Subject } from '@/lib/api';
 
 export default function CourseCard({ subject }: { subject: Subject }) {
-    const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop';
-    const imageUrl = subject.thumbnail || fallbackImage;
+    const [imgSrc, setImgSrc] = useState<string>('');
+    const [hasError, setHasError] = useState(false);
+
+    // Extract YouTube Video ID and Generate Initial Thumbnail
+    const videoId = subject.youtube_url?.split('v=')[1]?.split('&')[0];
+    const initialThumb = videoId
+        ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+        : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop';
+
+    useEffect(() => {
+        setImgSrc(initialThumb);
+    }, [initialThumb]);
+
+    const handleImageError = () => {
+        if (!hasError && videoId) {
+            setHasError(true);
+            setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+        }
+    };
 
     return (
         <Link
@@ -14,8 +32,9 @@ export default function CourseCard({ subject }: { subject: Subject }) {
         >
             <div className="aspect-video relative overflow-hidden rounded-t-xl">
                 <img
-                    src={imageUrl}
+                    src={imgSrc}
                     alt={subject.title}
+                    onError={handleImageError}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
