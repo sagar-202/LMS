@@ -113,13 +113,13 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Continue Learning Section */}
-                {continueLearningSubject && (
+                {continueLearningSubject ? (
                     <section className="mb-12">
                         <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Active Learning</h2>
                         <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 p-8 shadow-xl dark:shadow-none flex flex-col md:flex-row items-center gap-10">
                             <div className="w-full md:w-1/4 aspect-video rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
                                 <img
-                                    src={continueLearningSubject.thumbnail || 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=600&auto=format&fit=crop'}
+                                    src={continueLearningSubject.thumbnail || 'https://images.unsplash.com/photo-1518770660439-4636190af475'}
                                     alt={continueLearningSubject.title}
                                     className="w-full h-full object-cover"
                                 />
@@ -150,6 +150,25 @@ export default function DashboardPage() {
                             </div>
                         </div>
                     </section>
+                ) : (
+                    <section className="mb-12">
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Active Learning</h2>
+                        <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 p-12 shadow-xl dark:shadow-none text-center">
+                            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">You haven't started any courses yet.</h3>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-sm mx-auto">Explore our range of modern tech skills and start your first lesson today.</p>
+                            <Link
+                                href="/courses"
+                                className="inline-flex px-10 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25 hover:scale-105 active:scale-95"
+                            >
+                                Browse Courses
+                            </Link>
+                        </div>
+                    </section>
                 )}
 
                 <div className="bg-white dark:bg-gray-900 p-12 rounded-[3rem] border border-gray-100 dark:border-gray-800 shadow-xl dark:shadow-none relative overflow-hidden">
@@ -178,7 +197,7 @@ export default function DashboardPage() {
                             {subjectsWithProgress.filter(s => (s.progress?.completed_videos || 0) > 0).length === 0 && (
                                 <div className="text-center py-10">
                                     <p className="text-gray-500 dark:text-gray-400 font-medium">No activity yet. Start your first lesson today!</p>
-                                    <Link href="/#curriculum" className="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest mt-4 inline-block hover:underline">Browse Courses</Link>
+                                    <Link href="/courses" className="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest mt-4 inline-block hover:underline">Explore Curriculum</Link>
                                 </div>
                             )}
                         </div>
