@@ -10,7 +10,10 @@ export class SubjectsController {
     getAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const subjects = await subjectsService.getAllPublishedSubjects();
-            res.status(200).json(subjects);
+            res.status(200).json({
+                success: true,
+                data: subjects
+            });
         } catch (error) {
             next(error);
         }
@@ -28,7 +31,10 @@ export class SubjectsController {
             }
 
             const subject = await subjectsService.getSubjectById(subjectId);
-            res.status(200).json(subject);
+            res.status(200).json({
+                success: true,
+                data: subject
+            });
         } catch (error) {
             next(error);
         }
@@ -47,7 +53,10 @@ export class SubjectsController {
             }
 
             const tree = await subjectsService.getSubjectTree(subjectId, userId);
-            res.status(200).json(tree);
+            res.status(200).json({
+                success: true,
+                data: tree
+            });
         } catch (error) {
             next(error);
         }
@@ -74,7 +83,10 @@ export class SubjectsController {
                 return res.status(404).json({ message: 'No videos found for this subject' });
             }
 
-            res.status(200).json({ video_id: videoId });
+            res.status(200).json({
+                success: true,
+                data: { video_id: videoId }
+            });
         } catch (error) {
             next(error);
         }

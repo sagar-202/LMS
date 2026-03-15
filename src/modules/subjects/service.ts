@@ -21,6 +21,8 @@ export interface SectionNode {
 }
 
 export interface SubjectTree extends Omit<Subject, 'is_published' | 'created_at' | 'updated_at'> {
+    total_duration: number;
+    lessons_count: number;
     sections: SectionNode[];
 }
 
@@ -117,6 +119,9 @@ export class SubjectsService {
             slug: subject.slug,
             description: subject.description,
             category: subject.category,
+            difficulty: subject.difficulty,
+            total_duration: subject.total_duration,
+            lessons_count: subject.lessons_count,
             sections: sectionNodes
         };
 

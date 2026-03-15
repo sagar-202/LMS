@@ -10,7 +10,7 @@ interface SubjectProgressBarProps {
 
 export default function SubjectProgressBar({ percent, completed, total }: SubjectProgressBarProps) {
     return (
-        <div className="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-900 px-6 py-4">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
                     Progress: <span className="text-blue-600 dark:text-blue-400">{completed} / {total}</span> lessons completed

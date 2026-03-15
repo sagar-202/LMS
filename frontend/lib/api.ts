@@ -6,6 +6,9 @@ export interface Subject {
     slug: string;
     description: string;
     category: string;
+    difficulty: string;
+    lessons_count: number;
+    total_duration: number;
     thumbnail?: string;
     youtube_url?: string;
 }
@@ -29,6 +32,8 @@ export interface SubjectTree {
     id: number;
     title: string;
     description: string;
+    total_duration: number;
+    lessons_count: number;
     sections: SectionNode[];
 }
 
@@ -56,6 +61,21 @@ export interface SubjectProgress {
     last_video_id: number | null;
 }
 
+export interface OverallStats {
+    completed_lessons: number;
+    total_lessons: number;
+}
+
+export interface LastWatchedProgress {
+    subject_id: number;
+    subject_title: string;
+    video_id: number;
+    video_title: string;
+    youtube_video_id: string;
+    lesson_number: number;
+    total_lessons: number;
+}
+
 export const lmsApi = {
     getSubjects: () => apiFetch<Subject[]>('/subjects'),
 
@@ -71,6 +91,12 @@ export const lmsApi = {
     getSubjectProgress: (subjectId: number | string) =>
         apiFetch<SubjectProgress>(`/progress/subjects/${subjectId}`),
 
+    getOverallStats: () =>
+        apiFetch<OverallStats>('/progress/stats'),
+
+    getLastWatched: () =>
+        apiFetch<LastWatchedProgress | null>('/progress/last-watched'),
+
     getVideo: (videoId: number | string) =>
         apiFetch<VideoDetail>(`/videos/${videoId}`),
 
@@ -82,4 +108,12 @@ export const lmsApi = {
             method: 'POST',
             body: JSON.stringify(data),
         }),
+
+    enrollInSubject: (subjectId: number | string) =>
+        apiFetch<{ status: string; message: string }>(`/enroll/${subjectId}`, {
+            method: 'POST',
+        }),
+
+    getEnrollments: () =>
+        apiFetch<{ status: string; data: number[] }>('/enrollments'),
 };

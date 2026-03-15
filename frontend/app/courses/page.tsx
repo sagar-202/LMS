@@ -3,21 +3,27 @@
 import { useEffect, useState } from 'react';
 import { lmsApi, Subject } from '@/lib/api';
 import CourseCard from '@/components/Course/CourseCard';
+import Button from '@/components/ui/Button';
 
 export default function CoursesPage() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
-    const [activeCategory, setActiveCategory] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const [loading, setLoading] = useState(true);
+    const [enrolledSubjectIds, setEnrolledSubjectIds] = useState<number[]>([]);
 
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const data = await lmsApi.getSubjects();
-                setSubjects(data);
-                setFilteredSubjects(data);
+                const [subjectsData, enrollmentData] = await Promise.all([
+                    lmsApi.getSubjects(),
+                    lmsApi.getEnrollments()
+                ]);
+                setSubjects(subjectsData);
+                setFilteredSubjects(subjectsData);
+                setEnrolledSubjectIds(enrollmentData.data || []);
             } catch (err) {
-                console.error('Failed to fetch subjects:', err);
+                console.error('Failed to fetch data:', err);
             } finally {
                 setLoading(false);
             }
@@ -27,11 +33,11 @@ export default function CoursesPage() {
     }, []);
 
     const filterByCategory = (category: string) => {
-        setActiveCategory(category);
+        setSelectedCategory(category);
         if (category === 'All') {
             setFilteredSubjects(subjects);
         } else {
-            setFilteredSubjects(subjects.filter(s => s.category === category));
+            setFilteredSubjects(subjects.filter(s => s.category.toLowerCase() === category.toLowerCase()));
         }
     };
 
@@ -39,8 +45,8 @@ export default function CoursesPage() {
 
     if (loading) {
         return (
-            <div className="max-w-7xl mx-auto p-6 lg:p-12 space-y-12 bg-gray-50/30 dark:bg-gray-950 min-h-screen pt-32">
-                <div className="h-20 bg-gray-50 dark:bg-gray-900 rounded-3xl animate-pulse w-1/3"></div>
+            <div className="max-w-7xl mx-auto p-6 lg:p-12 space-y-12 bg-gray-50 dark:bg-gray-900 min-h-screen pt-32">
+                <div className="h-20 bg-gray-50 dark:bg-gray-800 rounded-3xl animate-pulse w-1/3"></div>
                 <div className="flex gap-3">
                     {[1, 2, 3, 4, 5].map(i => (
                         <div key={i} className="h-10 w-24 bg-gray-50 dark:bg-gray-900 rounded-2xl animate-pulse"></div>
@@ -54,8 +60,8 @@ export default function CoursesPage() {
     }
 
     return (
-        <main className="min-h-screen bg-gray-50/30 dark:bg-gray-950 pb-20 pt-32 transition-colors duration-500">
-            <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <main className="min-h-screen bg-transparent dark:bg-gray-950 pb-20 pt-32 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto px-6 lg:px-12 text-gray-900 dark:text-white opacity-0 translate-y-4 animate-[fadeIn_0.6s_ease_forwards]">
                 <header className="mb-16">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                         <div>
@@ -67,16 +73,15 @@ export default function CoursesPage() {
                             </h1>
                             <div className="flex flex-wrap gap-3">
                                 {categories.map(cat => (
-                                    <button
+                                    <Button
                                         key={cat}
                                         onClick={() => filterByCategory(cat)}
-                                        className={`px-6 py-3 rounded-2xl text-xs font-black tracking-widest uppercase transition-all duration-300 ${activeCategory === cat
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2'
-                                            : 'bg-white dark:bg-gray-900 text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-white'
-                                            }`}
+                                        variant={selectedCategory === cat ? 'primary' : 'outline'}
+                                        size="sm"
+                                        className={selectedCategory === cat ? '' : 'text-gray-400 dark:text-gray-500'}
                                     >
                                         {cat}
-                                    </button>
+                                    </Button>
                                 ))}
                             </div>
                         </div>
@@ -92,7 +97,11 @@ export default function CoursesPage() {
                 {filteredSubjects.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {filteredSubjects.map((subject) => (
-                            <CourseCard key={subject.id} subject={subject} />
+                            <CourseCard 
+                                key={subject.id} 
+                                subject={subject} 
+                                isEnrolled={enrolledSubjectIds.includes(subject.id)}
+                            />
                         ))}
                     </div>
                 ) : (

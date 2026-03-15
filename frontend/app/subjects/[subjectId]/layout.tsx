@@ -38,8 +38,8 @@ export default function SubjectLayout({
 
     return (
         <AuthGuard>
-            <div className="flex h-screen bg-gray-50 overflow-hidden">
-                <aside className="w-[300px] flex-shrink-0 border-r border-gray-200 bg-white h-full overflow-y-auto">
+            <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+                <aside className="w-[300px] flex-shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 h-full overflow-y-auto">
                     {loading ? (
                         <div className="flex items-center justify-center h-64">
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
@@ -58,7 +58,7 @@ export default function SubjectLayout({
                         <SubjectSidebar tree={tree} />
                     )}
                 </aside>
-                <main className="flex-1 overflow-y-auto bg-white">
+                <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
                     {children}
                 </main>
             </div>

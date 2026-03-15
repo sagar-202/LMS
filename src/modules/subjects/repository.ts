@@ -7,6 +7,9 @@ export interface Subject {
     slug: string;
     description: string;
     category: string;
+    difficulty: string;
+    lessons_count: number;
+    total_duration: number;
     is_published: boolean;
     first_video_id?: string;
     created_at: Date;
@@ -39,7 +42,15 @@ export class SubjectsRepository {
                  JOIN sections sec ON v.section_id = sec.id 
                  WHERE sec.subject_id = s.id 
                  ORDER BY sec.order_index ASC, v.order_index ASC 
-                 LIMIT 1) as first_video_id
+                 LIMIT 1) as first_video_id,
+                (SELECT COUNT(*) 
+                 FROM videos v 
+                 JOIN sections sec ON v.section_id = sec.id 
+                 WHERE sec.subject_id = s.id) as lessons_count,
+                (SELECT COALESCE(SUM(v.duration_seconds), 0) 
+                 FROM videos v 
+                 JOIN sections sec ON v.section_id = sec.id 
+                 WHERE sec.subject_id = s.id) as total_duration
             FROM subjects s 
             WHERE s.is_published = TRUE 
             ORDER BY s.created_at DESC
@@ -49,7 +60,20 @@ export class SubjectsRepository {
     }
 
     async getPublishedSubjectById(subjectId: number): Promise<Subject | null> {
-        const query = 'SELECT * FROM subjects WHERE id = ? AND is_published = TRUE LIMIT 1';
+        const query = `
+            SELECT s.*,
+                (SELECT COUNT(*) 
+                 FROM videos v 
+                 JOIN sections sec ON v.section_id = sec.id 
+                 WHERE sec.subject_id = s.id) as lessons_count,
+                (SELECT COALESCE(SUM(v.duration_seconds), 0) 
+                 FROM videos v 
+                 JOIN sections sec ON v.section_id = sec.id 
+                 WHERE sec.subject_id = s.id) as total_duration
+            FROM subjects s 
+            WHERE s.id = ? AND s.is_published = TRUE 
+            LIMIT 1
+        `;
         const [rows] = await db.query<RowDataPacket[]>(query, [subjectId]);
         if (rows.length === 0) return null;
         return rows[0] as Subject;

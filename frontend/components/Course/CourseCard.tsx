@@ -1,57 +1,86 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Subject } from '@/lib/api';
+import { lmsApi, Subject } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { getYoutubeThumbnail } from '@/lib/youtube';
 
-export default function CourseCard({ subject }: { subject: Subject }) {
-    const [imgSrc, setImgSrc] = useState<string>('');
-    const [hasError, setHasError] = useState(false);
+export default function CourseCard({ 
+    subject, 
+    isEnrolled = false,
+    onEnrollSuccess
+}: { 
+    subject: Subject, 
+    isEnrolled?: boolean,
+    onEnrollSuccess?: () => void
+}) {
+    const router = useRouter();
+    const [isEnrolling, setIsEnrolling] = useState(false);
 
-    // Extract YouTube Video ID and Generate Initial Thumbnail
-    const videoId = subject.youtube_url?.split('v=')[1]?.split('&')[0];
-    const initialThumb = videoId
-        ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-        : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop';
+    const thumbnail = getYoutubeThumbnail(subject.youtube_url);
 
-    useEffect(() => {
-        setImgSrc(initialThumb);
-    }, [initialThumb]);
+    const handleEnroll = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (isEnrolled) {
+            router.push(`/subjects/${subject.id}`);
+            return;
+        }
 
-    const handleImageError = () => {
-        if (!hasError && videoId) {
-            setHasError(true);
-            setImgSrc(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+        try {
+            setIsEnrolling(true);
+            await lmsApi.enrollInSubject(subject.id);
+            if (onEnrollSuccess) onEnrollSuccess();
+            router.push(`/subjects/${subject.id}`);
+        } catch (error) {
+            console.error('Enrollment failed:', error);
+            alert('Failed to enroll in the course. Please try again.');
+        } finally {
+            setIsEnrolling(false);
         }
     };
 
     return (
-        <Link
-            href={`/subjects/${subject.id}`}
-            className="group bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl dark:shadow-none hover:shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)] dark:hover:bg-gray-800 transition-all duration-500 flex flex-col transform hover:-translate-y-2"
+        <div
+            onClick={() => router.push(`/subjects/${subject.id}`)}
+            className="group bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xl transition-all duration-300 flex flex-col transform hover:-translate-y-1 cursor-pointer hover:shadow-[0_10px_40px_rgba(59,130,246,0.25)] hover:ring-2 hover:ring-blue-500/40 hover:border-blue-500"
         >
             <div className="aspect-video relative overflow-hidden rounded-t-xl">
                 <img
-                    src={imgSrc}
+                    src={thumbnail || '/placeholder-course.jpg'}
                     alt={subject.title}
-                    onError={handleImageError}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
             <div className="p-10 flex flex-col flex-1">
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
                     {subject.title}
                 </h2>
+                <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-3 mb-4 font-bold">
+                    <span>{subject.difficulty}</span>
+                    <span>•</span>
+                    <span>{subject.lessons_count} Lessons</span>
+                </div>
                 <p className="text-gray-500 dark:text-gray-400 text-base mb-8 flex-1 leading-relaxed line-clamp-2 font-medium">
                     {subject.description || 'Master this subject with our industry-led expert course curriculum.'}
                 </p>
-                <div className="flex items-center justify-between pt-8 border-t border-gray-50 dark:border-gray-800">
-                    <div className="text-blue-600 dark:text-blue-400 font-bold group-hover:translate-x-1 transition-transform">
-                        Go to Course →
-                    </div>
+                <div className="flex justify-start mt-auto pt-8 border-t border-gray-50 dark:border-gray-800">
+                    <button
+                        onClick={handleEnroll}
+                        disabled={isEnrolling}
+                        className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl px-6 py-3 hover:shadow-lg transition-all duration-200 active:scale-95 disabled:opacity-50 shadow-md shadow-blue-500/10"
+                    >
+                        {isEnrolled && !isEnrolling && (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                        )}
+                        {isEnrolling ? 'Enrolling...' : isEnrolled ? 'Continue Learning' : 'Enroll Course'}
+                    </button>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

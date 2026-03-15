@@ -42,8 +42,7 @@ export class ProgressService {
 
     async getSubjectProgress(userId: number, subjectId: number) {
         const stats = await progressRepository.getSubjectProgressStats(userId, subjectId);
-
-        if (!stats || stats.total_videos === 0) {
+        if (!stats) {
             return {
                 total_videos: 0,
                 completed_videos: 0,
@@ -53,19 +52,25 @@ export class ProgressService {
             };
         }
 
-        const total = Number(stats.total_videos) || 0;
-        const completed = Number(stats.completed_videos) || 0;
-
-        // Calculate percentage as rounded integer
-        const percent = total > 0 ? Math.floor((completed / total) * 100) : 0;
+        const total = stats.total_videos || 0;
+        const completed = stats.completed_videos || 0;
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         return {
             total_videos: total,
             completed_videos: completed,
             percent_complete: percent,
-            last_video_id: stats.last_video_id || null,
-            last_position_seconds: Number(stats.last_position_seconds) || 0
+            last_video_id: stats.last_video_id,
+            last_position_seconds: stats.last_position_seconds
         };
+    }
+
+    async getOverallProgress(userId: number) {
+        return await progressRepository.getOverallProgressStats(userId);
+    }
+
+    async getLastWatched(userId: number) {
+        return await progressRepository.getLastWatchedProgress(userId);
     }
 }
 

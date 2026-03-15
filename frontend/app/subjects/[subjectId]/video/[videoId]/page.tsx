@@ -86,7 +86,7 @@ export default function VideoLessonPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh] bg-transparent dark:bg-gray-950">
+            <div className="flex items-center justify-center min-h-[60vh] bg-gray-50 dark:bg-gray-900">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
             </div>
         );
@@ -94,7 +94,7 @@ export default function VideoLessonPage() {
 
     if (error || !video) {
         return (
-            <div className="max-w-4xl mx-auto p-12 text-center bg-transparent dark:bg-gray-950">
+            <div className="max-w-4xl mx-auto p-12 text-center bg-gray-50 dark:bg-gray-950">
                 <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 p-6 rounded-2xl border border-red-100 dark:border-red-900/50">
                     <p className="font-bold text-lg mb-2">Error Loading Lesson</p>
                     <p>{error || 'The requested lesson could not be found.'}</p>
@@ -111,8 +111,8 @@ export default function VideoLessonPage() {
 
     if (video.locked) {
         return (
-            <div className="max-w-4xl mx-auto p-12 text-center bg-transparent dark:bg-gray-950">
-                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-12 rounded-3xl">
+            <div className="max-w-4xl mx-auto p-12 text-center bg-gray-50 dark:bg-gray-900">
+                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-12 rounded-3xl">
                     <div className="text-6xl mb-6">🔒</div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{video.title}</h1>
                     <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto">
@@ -130,7 +130,7 @@ export default function VideoLessonPage() {
     }
 
     return (
-        <div className="bg-gray-50/30 dark:bg-gray-950 min-h-screen pb-24 transition-colors duration-500">
+        <div className="bg-gray-50 dark:bg-gray-900 min-h-screen pb-24 transition-colors duration-300">
             {/* Cinematic Container */}
             <div className="max-w-5xl mx-auto px-6 pt-10">
                 {/* Top Section: Breadcrumb */}
@@ -186,18 +186,13 @@ export default function VideoLessonPage() {
                 </div>
 
                 {/* Lesson Info Card */}
-                <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 p-10 lg:p-12 shadow-sm mb-12 transition-all">
+                <div className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-10 lg:p-12 shadow-sm mb-12 transition-all">
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
                         <div>
                             <span className="inline-block px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest mb-4">CURRENT LESSON</span>
                             <h1 className="text-3xl lg:text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
                                 {video.title}
                             </h1>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-xl transition-all">
-                                {Math.floor(video.duration_seconds / 60)}:{(video.duration_seconds % 60).toString().padStart(2, '0')} min
-                            </span>
                         </div>
                     </div>
 
@@ -214,8 +209,8 @@ export default function VideoLessonPage() {
                         onClick={goToPrevious}
                         disabled={!video.previous_video_id}
                         className={`group flex items-center gap-4 px-8 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all w-full sm:w-auto justify-center ${video.previous_video_id
-                            ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-gray-200 shadow-sm hover:shadow-md active:scale-95'
-                            : 'bg-gray-50 dark:bg-gray-950 text-gray-300 dark:text-gray-700 border border-gray-100 dark:border-gray-900 cursor-not-allowed opacity-50'
+                            ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-900 dark:hover:border-gray-200 shadow-sm hover:shadow-md active:scale-95'
+                            : 'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-700 border border-gray-100 dark:border-gray-700 cursor-not-allowed opacity-50'
                             }`}
                     >
                         <svg className={`w-5 h-5 ${video.previous_video_id ? 'group-hover:-translate-x-1 transition-transform text-blue-600 dark:text-blue-400' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

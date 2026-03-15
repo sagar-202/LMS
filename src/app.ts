@@ -8,6 +8,7 @@ import authRoutes from './modules/auth/routes';
 import subjectsRoutes from './modules/subjects/routes';
 import videosRoutes from './modules/videos/routes';
 import progressRoutes from './modules/progress/routes';
+import enrollmentRoutes from './modules/enrollment/routes';
 import healthRoutes from './modules/health/routes';
 
 const app: Application = express();
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subjects', subjectsRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api', enrollmentRoutes);
 app.use('/api/health', healthRoutes);
 
 // 404 Handler

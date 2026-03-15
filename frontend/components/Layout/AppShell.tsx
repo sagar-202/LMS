@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/context/ThemeContext';
+import Button from '@/components/ui/Button';
 
 interface AppShellProps {
     children: React.ReactNode;
 }
 
 export default function AppShell({ children }: AppShellProps) {
-    const { isAuthenticated, logout, user } = useAuthStore();
+    const { isAuthenticated, logout, user, initializeAuth, isInitialized } = useAuthStore();
     const { theme, toggleTheme } = useTheme();
     const router = useRouter();
     const pathname = usePathname();
@@ -20,6 +21,10 @@ export default function AppShell({ children }: AppShellProps) {
 
     // Do not show header on auth pages
     const isAuthPage = pathname.startsWith('/auth');
+
+    React.useEffect(() => {
+        initializeAuth();
+    }, [initializeAuth]);
 
     const handleLogout = async () => {
         setDropdownOpen(false);
@@ -31,11 +36,19 @@ export default function AppShell({ children }: AppShellProps) {
         return <>{children}</>;
     }
 
+    if (!isInitialized) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
     const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
 
     return (
-        <div className="flex flex-col min-h-screen bg-transparent dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-500">
-            <header className="sticky top-0 z-[100] w-full bg-white/70 dark:bg-gray-950/70 backdrop-blur-xl border-b border-gray-100/50 dark:border-gray-800/50 transition-all duration-300">
+        <div className="flex flex-col min-h-screen font-sans transition-colors duration-300 bg-white dark:bg-gray-900">
+            <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/60 dark:bg-gray-900/60 border-b border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-300">
                 <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="flex justify-between items-center h-20">
                         {/* Brand / Logo */}
@@ -120,26 +133,29 @@ export default function AppShell({ children }: AppShellProps) {
                                                     </svg>
                                                     My Dashboard
                                                 </Link>
-                                                <button
+                                                <Button
+                                                    variant="ghost"
                                                     onClick={handleLogout}
-                                                    className="w-full flex items-center gap-3 px-6 py-4 text-sm font-bold text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                    className="w-full flex items-center justify-start gap-3 px-6 py-4 text-sm font-bold text-red-500 hover:bg-red-50 active:scale-95 transition-colors rounded-none"
                                                 >
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                                     </svg>
                                                     Sign Out
-                                                </button>
+                                                </Button>
                                             </div>
                                         </>
                                     )}
                                 </div>
                             ) : (
-                                <Link
+                                <Button
                                     href="/auth/login"
-                                    className="px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-black rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-400 transition-all shadow-xl shadow-gray-200 dark:shadow-none hover:shadow-blue-500/20 active:scale-95"
+                                    variant="primary"
+                                    size="sm"
+                                    className="px-8 py-3"
                                 >
                                     Sign In
-                                </Link>
+                                </Button>
                             )}
                         </div>
                     </div>

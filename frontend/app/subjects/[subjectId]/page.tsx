@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
 import { lmsApi, SubjectTree, SubjectProgress } from '@/lib/api';
 
 export default function SubjectDashboardPage() {
@@ -93,7 +94,7 @@ export default function SubjectDashboardPage() {
     }
 
     const totalSections = tree.sections.length;
-    const totalLessons = progress?.total_videos || tree.sections.reduce((acc, s) => acc + s.videos.length, 0);
+    const totalLessons = tree.lessons_count || progress?.total_videos || tree.sections.reduce((acc, s) => acc + s.videos.length, 0);
     const percent = progress?.percent_complete || 0;
     const hasStarted = progress && progress.completed_videos > 0;
 
@@ -128,10 +129,6 @@ export default function SubjectDashboardPage() {
                             <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
                                 <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-widest font-black mb-1">Lessons</p>
                                 <p className="text-3xl font-black text-gray-900 dark:text-white">{totalLessons}</p>
-                            </div>
-                            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm col-span-2 md:col-span-1">
-                                <p className="text-gray-400 dark:text-gray-500 text-xs uppercase tracking-widest font-black mb-1">Est. Duration</p>
-                                <p className="text-3xl font-black text-gray-900 dark:text-white">~{Math.round(totalLessons * 12 / 60)}h</p>
                             </div>
                         </div>
 
@@ -195,12 +192,14 @@ export default function SubjectDashboardPage() {
                                 }
                             </p>
 
-                            <button
+                            <Button
                                 onClick={handleAction}
-                                className="w-full py-5 bg-blue-600 dark:bg-white text-white dark:text-gray-950 font-black rounded-[1.5rem] hover:bg-black dark:hover:bg-gray-100 hover:shadow-xl hover:shadow-blue-500/20 transition-all transform hover:-translate-y-1 active:translate-y-0"
+                                variant="primary"
+                                size="lg"
+                                className="w-full"
                             >
                                 {hasStarted ? 'Continue Learning' : 'Start Learning'}
-                            </button>
+                            </Button>
 
                             <p className="mt-6 text-xs font-black uppercase tracking-widest text-gray-300 dark:text-gray-700">
                                 Professional Certificate

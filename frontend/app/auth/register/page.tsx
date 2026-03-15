@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
+import Button from '@/components/ui/Button';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -85,14 +86,19 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <button
+                        <Button
                             type="submit"
                             disabled={loading}
-                            className={`w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                            className="w-full"
+                            size="lg"
                         >
-                            {loading ? 'Creating account...' : 'Register'}
-                        </button>
+                            {loading ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Creating account...
+                                </div>
+                            ) : 'Create Account'}
+                        </Button>
                     </div>
                     <div className="text-center">
                         <Link href="/auth/login" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">

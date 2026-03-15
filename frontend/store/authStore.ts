@@ -12,7 +12,9 @@ interface AuthState {
     accessToken: string | null;
     isAuthenticated: boolean;
     loading: boolean;
+    isInitialized: boolean;
 
+    initializeAuth: () => Promise<void>;
     setAccessToken: (token: string) => void;
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
@@ -26,7 +28,35 @@ export const useAuthStore = create<AuthState>((set) => ({
     accessToken: null,
     isAuthenticated: false,
     loading: false,
+    isInitialized: false,
 
+    initializeAuth: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const text = await response.text();
+                const result = text ? JSON.parse(text) : null;
+                const token = result?.data?.accessToken;
+                if (token) {
+                    const decodedUser = jwtDecode<User>(token);
+                    set({
+                        accessToken: token,
+                        user: decodedUser,
+                        isAuthenticated: true,
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Auth initialization failed', e);
+        } finally {
+            set({ isInitialized: true });
+        }
+    },
     setAccessToken: (token: string) => {
         try {
             const decodedUser = jwtDecode<User>(token);

@@ -21,7 +21,10 @@ export class ProgressController {
             }
 
             const progress = await progressService.getVideoProgress(userId, videoId);
-            res.status(200).json(progress);
+            res.status(200).json({
+                success: true,
+                data: progress
+            });
         } catch (error) {
             next(error);
         }
@@ -47,7 +50,10 @@ export class ProgressController {
             const is_completed = req.body.is_completed === true;
 
             const progress = await progressService.updateVideoProgress(userId, videoId, last_position_seconds, is_completed);
-            res.status(200).json(progress);
+            res.status(200).json({
+                success: true,
+                data: progress
+            });
         } catch (error) {
             next(error);
         }
@@ -70,7 +76,52 @@ export class ProgressController {
             }
 
             const stats = await progressService.getSubjectProgress(userId, subjectId);
-            res.status(200).json(stats);
+            res.status(200).json({
+                success: true,
+                data: stats
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    /**
+     * GET /api/progress/last-watched
+     * Get the most recently watched video progress
+     */
+    getLastWatched = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
+
+            const lastWatched = await progressService.getLastWatched(userId);
+            res.status(200).json({
+                success: true,
+                data: lastWatched
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    /**
+     * GET /api/progress/stats
+     * Get overall progress stats for the user
+     */
+    getOverallStats = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({ message: 'Authentication required' });
+            }
+
+            const stats = await progressService.getOverallProgress(userId);
+            res.status(200).json({
+                success: true,
+                data: stats
+            });
         } catch (error) {
             next(error);
         }

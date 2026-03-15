@@ -16,30 +16,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        // Hydrate from localStorage
-        const savedTheme = localStorage.getItem('theme') as Theme | null;
-        if (savedTheme) {
-            setTheme(savedTheme);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            setTheme('dark');
-        }
+        // Hydrate React state by reading the actual DOM class applied by the layout script.
+        // This guarantees React and the DOM are perfectly in sync and stops hydration flashes.
+        const isDarkDom = document.documentElement.classList.contains('dark');
+        setTheme(isDarkDom ? 'dark' : 'light');
         setMounted(true);
     }, []);
 
-    useEffect(() => {
-        if (!mounted) return;
-
-        const root = window.document.documentElement;
-        if (theme === 'dark') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-        localStorage.setItem('theme', theme);
-    }, [theme, mounted]);
-
     const toggleTheme = () => {
-        setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+        const root = window.document.documentElement;
+        const isDark = root.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        setTheme(isDark ? 'dark' : 'light');
     };
 
     return (

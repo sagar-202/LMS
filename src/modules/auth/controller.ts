@@ -28,9 +28,12 @@ export class AuthController {
             this.setRefreshCookie(res, refreshToken);
 
             res.status(201).json({
-                message: 'Registration successful',
-                user,
-                accessToken
+                success: true,
+                data: {
+                    user,
+                    accessToken,
+                    message: 'Registration successful'
+                }
             });
         } catch (error) {
             next(error);
@@ -50,9 +53,12 @@ export class AuthController {
             this.setRefreshCookie(res, refreshToken);
 
             res.status(200).json({
-                message: 'Login successful',
-                user,
-                accessToken
+                success: true,
+                data: {
+                    user,
+                    accessToken,
+                    message: 'Login successful'
+                }
             });
         } catch (error) {
             next(error);
@@ -69,8 +75,9 @@ export class AuthController {
 
             const { accessToken } = await authService.refresh(refreshToken);
 
-            res.status(200).json({
-                accessToken
+            res.status(201).json({
+                success: true,
+                data: { accessToken }
             });
         } catch (error) {
             next(error);
@@ -91,7 +98,10 @@ export class AuthController {
                 sameSite: 'strict'
             });
 
-            res.status(200).json({ message: 'Logged out successfully' });
+            res.status(200).json({
+                success: true,
+                data: { message: 'Logged out successfully' }
+            });
         } catch (error) {
             next(error);
         }

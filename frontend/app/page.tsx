@@ -2,21 +2,26 @@
 
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import Button from '@/components/ui/Button';
 
 export default function Home() {
   const { isAuthenticated } = useAuthStore();
 
   return (
-    <main className="min-h-screen bg-transparent dark:bg-gray-950 transition-colors duration-500 overflow-hidden">
+    <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300 overflow-hidden text-gray-900 dark:text-white">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 dark:from-blue-900/10 via-white dark:via-gray-950 to-white dark:to-gray-950 opacity-70"></div>
+      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40 overflow-hidden">
+        {/* Decorative Background Glows */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-blue-600 to-purple-600 rounded-full blur-[100px] opacity-20 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full blur-[120px] opacity-20 translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
+
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 dark:from-blue-900/10 via-white dark:via-gray-900 to-white dark:to-gray-900 opacity-70"></div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-200 dark:via-blue-800 to-transparent"></div>
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center relative">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center relative z-10 opacity-0 translate-y-4 animate-[fadeIn_0.6s_ease_forwards]">
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-400/10 dark:bg-blue-600/5 blur-[120px] rounded-full -z-10"></div>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-widest mb-10 animate-fade-in shadow-sm">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest mb-8 border border-blue-100 dark:border-blue-800">
             <span className="flex h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse"></span>
             Elevate Your Career
           </div>
@@ -31,27 +36,22 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            {isAuthenticated ? (
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto px-12 py-5 bg-blue-600 dark:bg-white dark:text-gray-950 text-white font-black rounded-2xl hover:bg-blue-700 dark:hover:bg-gray-100 transition-all shadow-2xl shadow-blue-500/30 dark:shadow-none hover:scale-105 active:scale-95 text-lg"
-              >
-                Go to Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/auth/register"
-                className="w-full sm:w-auto px-12 py-5 bg-blue-600 dark:bg-white dark:text-gray-950 text-white font-black rounded-2xl hover:bg-blue-700 dark:hover:bg-gray-100 transition-all shadow-2xl shadow-blue-500/30 dark:shadow-none hover:scale-105 active:scale-95 text-lg"
-              >
-                Get Started Free
-              </Link>
-            )}
-            <Link
+            <Button
+              href={isAuthenticated ? "/dashboard" : "/auth/register"}
+              variant="primary"
+              size="xl"
+              className="w-full sm:w-auto"
+            >
+              {isAuthenticated ? "Go to Dashboard" : "Get Started Free"}
+            </Button>
+            <Button
               href="/courses"
-              className="w-full sm:w-auto px-12 py-5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-black rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-400 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all shadow-sm hover:scale-105 active:scale-95 text-center text-lg"
+              variant="outline"
+              size="xl"
+              className="w-full sm:w-auto"
             >
               Explore Curriculum
-            </Link>
+            </Button>
           </div>
 
           <div className="mt-24 pt-12 border-t border-gray-100 dark:border-gray-900 grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
@@ -76,7 +76,7 @@ export default function Home() {
       </section>
 
       {/* Platform Description Section */}
-      <section className="py-32 bg-white dark:bg-gray-950 relative">
+      <section className="py-32 bg-white dark:bg-gray-900 relative">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-24">
             <h2 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-6">Designed for Growth</h2>
@@ -129,12 +129,14 @@ export default function Home() {
               <h2 className="text-4xl lg:text-6xl font-black text-white dark:text-gray-950 mb-8 tracking-tight">
                 Ready to transform <br className="hidden md:block" /> your future?
               </h2>
-              <Link
+              <Button
                 href={isAuthenticated ? "/dashboard" : "/auth/register"}
-                className="inline-flex px-12 py-5 bg-white dark:bg-blue-600 text-blue-600 dark:text-white font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl text-lg"
+                variant={isAuthenticated ? "white" : "white"}
+                size="lg"
+                className="dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
               >
                 Join the Academy Now
-              </Link>
+              </Button>
             </div>
           </div>
         </div>

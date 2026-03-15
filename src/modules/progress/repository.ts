@@ -101,6 +101,67 @@ export class ProgressRepository {
         if (!firstRow) return null;
         return firstRow.video_id;
     }
+
+    async getLastWatchedProgress(userId: number): Promise<RowDataPacket | null> {
+        const query = `
+            SELECT 
+                s.id as subject_id,
+                s.title as subject_title,
+                v.id as video_id,
+                v.title as video_title,
+                v.youtube_video_id,
+                (
+                    SELECT COUNT(*) 
+                    FROM videos v2
+                    JOIN sections sec2 ON v2.section_id = sec2.id
+                    WHERE sec2.subject_id = s.id 
+                    AND (sec2.order_index < sec.order_index OR (sec2.order_index = sec.order_index AND v2.order_index <= v.order_index))
+                ) as lesson_number,
+                (
+                    SELECT COUNT(*)
+                    FROM videos v3
+                    JOIN sections sec3 ON v3.section_id = sec3.id
+                    WHERE sec3.subject_id = s.id
+                ) as total_lessons
+            FROM video_progress vp
+            JOIN videos v ON vp.video_id = v.id
+            JOIN sections sec ON v.section_id = sec.id
+            JOIN subjects s ON sec.subject_id = s.id
+            WHERE vp.user_id = ?
+            ORDER BY vp.updated_at DESC
+            LIMIT 1
+        `;
+
+        const [rows] = await db.query<RowDataPacket[]>(query, [userId]);
+        if (!rows || rows.length === 0) return null;
+        return rows[0] ?? null;
+    }
+
+    async getOverallProgressStats(userId: number): Promise<{ completed_lessons: number; total_lessons: number }> {
+        const query = `
+            SELECT 
+                (
+                    SELECT COUNT(*)
+                    FROM video_progress vp
+                    JOIN videos v ON vp.video_id = v.id
+                    JOIN sections s ON v.section_id = s.id
+                    WHERE vp.user_id = ? AND vp.is_completed = 1
+                    AND s.subject_id IN (SELECT subject_id FROM enrollments WHERE user_id = ?)
+                ) as completed_lessons,
+                (
+                    SELECT COUNT(*)
+                    FROM videos v
+                    JOIN sections s ON v.section_id = s.id
+                    WHERE s.subject_id IN (SELECT subject_id FROM enrollments WHERE user_id = ?)
+                ) as total_lessons
+        `;
+
+        const [rows] = await db.query<RowDataPacket[]>(query, [userId, userId, userId]);
+        return {
+            completed_lessons: rows[0]?.completed_lessons || 0,
+            total_lessons: rows[0]?.total_lessons || 0
+        };
+    }
 }
 
 export const progressRepository = new ProgressRepository();

@@ -20,7 +20,10 @@ export class VideosController {
             }
 
             const payload = await videosService.getVideoWithNavigation(videoId, userId);
-            res.status(200).json(payload);
+            res.status(200).json({
+                success: true,
+                data: payload
+            });
         } catch (error) {
             next(error);
         }

@@ -45,15 +45,16 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
 
             try {
                 // call POST /api/auth/refresh
-                const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+                const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                 });
 
                 if (refreshResponse.ok) {
-                    const data = await refreshResponse.json();
-                    const newAccessToken = data.accessToken;
+                    const text = await refreshResponse.text();
+                    const result = text ? JSON.parse(text) : null;
+                    const newAccessToken = result?.data?.accessToken;
                     setAccessToken(newAccessToken);
 
                     isRefreshing = false;
@@ -86,10 +87,12 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
                         try {
                             const retryResponse = await fetch(fullUrl, config);
                             if (!retryResponse.ok) {
-                                const errorData = await retryResponse.json().catch(() => ({}));
+                                const errorText = await retryResponse.text();
+                                const errorData = errorText ? JSON.parse(errorText) : {};
                                 reject(new Error(errorData.message || 'API request failed'));
                             } else {
-                                const retryData: T = await retryResponse.json();
+                                const retryText = await retryResponse.text();
+                                const retryData: T = retryText ? JSON.parse(retryText) : null;
                                 resolve(retryData);
                             }
                         } catch (err) {
@@ -104,12 +107,21 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
     }
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorText = await response.text().catch(() => '');
+        const errorData = errorText ? JSON.parse(errorText) : {};
         throw new Error(errorData.message || 'API request failed');
     }
 
-    // Return JSON automatically
-    return response.json() as Promise<T>;
+    // Safe JSON parsing that handles empty bodies
+    const text = await response.text();
+    const result = text ? JSON.parse(text) : null;
+
+    // If the response follows our { success: true, data: ... } pattern, extract the data
+    if (result && typeof result === 'object' && 'success' in result && 'data' in result) {
+        return result.data as T;
+    }
+
+    return result as T;
 }
 
 export async function get<T = any>(url: string): Promise<T> {
