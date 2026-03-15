@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 import AppShell from "@/components/Layout/AppShell";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export default function RootLayout({
   children,
@@ -26,13 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppShell>
-          {children}
-        </AppShell>
+        <ThemeProvider>
+          <AppShell>
+            {children}
+          </AppShell>
+        </ThemeProvider>
       </body>
     </html>
   );
