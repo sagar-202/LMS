@@ -17,7 +17,7 @@ const routes_6 = __importDefault(require("./modules/health/routes"));
 const app = (0, express_1.default)();
 // Middleware
 app.use((0, cors_1.default)({
-    origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
+    origin: ['http://localhost:3001', 'http://127.0.0.1:3001', 'https://lms-ten-iota.vercel.app'],
     credentials: true
 }));
 app.use(express_1.default.json());
