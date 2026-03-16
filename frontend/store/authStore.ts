@@ -84,12 +84,13 @@ export const useAuthStore = create<AuthState>((set) => ({
                 credentials: 'include',
             });
 
-            const data = await response.json();
+            const text = await response.text();
+            const result = text ? JSON.parse(text) : null;
             if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
+                throw new Error(result?.message || 'Login failed');
             }
 
-            const { accessToken } = data;
+            const accessToken = result?.data?.accessToken;
             const decodedUser = jwtDecode<User>(accessToken);
 
             set({
@@ -114,12 +115,13 @@ export const useAuthStore = create<AuthState>((set) => ({
                 credentials: 'include',
             });
 
-            const data = await response.json();
+            const text = await response.text();
+            const result = text ? JSON.parse(text) : null;
             if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
+                throw new Error(result?.message || 'Registration failed');
             }
 
-            const { accessToken } = data;
+            const accessToken = result?.data?.accessToken;
             const decodedUser = jwtDecode<User>(accessToken);
 
             set({
