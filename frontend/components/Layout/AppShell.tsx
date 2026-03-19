@@ -73,7 +73,10 @@ export default function AppShell({ children }: AppShellProps) {
                             {[
                                 { name: 'Home', href: '/' },
                                 { name: 'Courses', href: '/courses' },
-                                { name: 'Dashboard', href: '/dashboard' }
+                                { name: 'Dashboard', href: '/dashboard' },
+                                ...(user?.role === 'instructor' || user?.role === 'admin' 
+                                    ? [{ name: 'Instructor CMS', href: '/instructor/dashboard' }] 
+                                    : [])
                             ].map((item) => (
                                 <Link
                                     key={item.name}
@@ -140,6 +143,18 @@ export default function AppShell({ children }: AppShellProps) {
                                                     </svg>
                                                     My Dashboard
                                                 </Link>
+                                                {(user?.role === 'instructor' || user?.role === 'admin') && (
+                                                    <Link
+                                                        href="/instructor/dashboard"
+                                                        className="flex items-center gap-3 px-6 py-4 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                        onClick={() => setDropdownOpen(false)}
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                                        </svg>
+                                                        Instructor CMS
+                                                    </Link>
+                                                )}
                                                 <Button
                                                     variant="ghost"
                                                     onClick={handleLogout}

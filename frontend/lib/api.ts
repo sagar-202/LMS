@@ -9,6 +9,7 @@ export interface Subject {
     difficulty: string;
     lessons_count: number;
     total_duration: number;
+    is_published: boolean;
     thumbnail?: string;
     youtube_url?: string;
 }
@@ -116,4 +117,20 @@ export const lmsApi = {
 
     getEnrollments: () =>
         apiFetch<{ status: string; data: number[] }>('/enrollments'),
+
+    // Instructor APIs
+    getInstructorDashboard: () =>
+        apiFetch<Subject[]>('/instructor/dashboard'),
+
+    createCourse: (data: Partial<Subject>) =>
+        apiFetch<{ id: number; slug: string }>('/instructor/courses', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+
+    addLesson: (subjectId: number | string, sectionTitle: string, lessonData: any) =>
+        apiFetch<{ videoId: number; sectionId: number }>('/instructor/lessons', {
+            method: 'POST',
+            body: JSON.stringify({ subjectId, sectionTitle, lessonData }),
+        }),
 };
