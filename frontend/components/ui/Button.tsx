@@ -5,12 +5,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'white';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   href?: string;
+  target?: string;
+  rel?: string;
   className?: string;
   children: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', href, className = '', children, ...props }, ref) => {
+  ({ variant = 'primary', size = 'md', href, target, rel, className = '', children, ...props }, ref) => {
     const baseStyles = 'inline-flex items-center justify-center font-black rounded-2xl transition-all duration-200 active:scale-95 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50';
     
     const variants = {
@@ -32,7 +34,7 @@ const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPro
 
     if (href) {
       return (
-        <Link href={href} className={combinedClasses}>
+        <Link href={href} target={target} rel={rel} className={combinedClasses}>
           {children}
         </Link>
       );

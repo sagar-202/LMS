@@ -10,14 +10,14 @@ interface CommentsSectionProps {
 }
 
 export default function CommentsSection({ lessonId }: CommentsSectionProps) {
-    const { user, isAuthenticated } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const [comments, setComments] = useState<CommentNode[]>([]);
     const [loading, setLoading] = useState(true);
     const [newComment, setNewComment] = useState('');
     const [replyingTo, setReplyingTo] = useState<number | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const fetchComments = async () => {
+    const fetchComments = React.useCallback(async () => {
         try {
             setLoading(true);
             const data = await lmsApi.getComments(lessonId);
@@ -27,11 +27,11 @@ export default function CommentsSection({ lessonId }: CommentsSectionProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [lessonId]);
 
     useEffect(() => {
         if (lessonId) fetchComments();
-    }, [lessonId]);
+    }, [lessonId, fetchComments]);
 
     const handleSubmit = async (parentId: number | null = null) => {
         const content = parentId ? (document.getElementById(`reply-${parentId}`) as HTMLTextAreaElement)?.value : newComment;
@@ -45,7 +45,7 @@ export default function CommentsSection({ lessonId }: CommentsSectionProps) {
             await fetchComments();
         } catch (err) {
             console.error('Failed to post comment:', err);
-            alert('Failed to post comment. Please try again.');
+            window.alert('Failed to post comment. Please try again.');
         } finally {
             setSubmitting(false);
         }

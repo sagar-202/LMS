@@ -166,7 +166,7 @@ export const lmsApi = {
             body: JSON.stringify(data),
         }),
 
-    addLesson: (subjectId: number | string, sectionTitle: string, lessonData: any) =>
+    addLesson: (subjectId: number | string, sectionTitle: string, lessonData: unknown) =>
         apiFetch<{ videoId: number; sectionId: number }>('/instructor/lessons', {
             method: 'POST',
             body: JSON.stringify({ subjectId, sectionTitle, lessonData }),

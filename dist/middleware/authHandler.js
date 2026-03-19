@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.protect = void 0;
+exports.authorizeRoles = exports.protect = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../config/env");
 const protect = (req, res, next) => {
@@ -26,6 +26,7 @@ const protect = (req, res, next) => {
         req.user = {
             id: decoded.userId,
             email: decoded.email,
+            role: decoded.role
         };
         next();
     }
@@ -38,4 +39,19 @@ const protect = (req, res, next) => {
     }
 };
 exports.protect = protect;
+/**
+ * Middleware to restrict access based on user roles
+ */
+const authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({
+                status: 'error',
+                message: `User role '${req.user?.role}' is not authorized to access this route`
+            });
+        }
+        next();
+    };
+};
+exports.authorizeRoles = authorizeRoles;
 //# sourceMappingURL=authHandler.js.map

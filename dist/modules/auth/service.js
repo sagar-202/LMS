@@ -12,7 +12,7 @@ const repository_1 = require("./repository");
 class AuthService {
     generateAccessToken(user) {
         const secret = env_1.env.JWT_SECRET;
-        return jsonwebtoken_1.default.sign({ userId: user.id, email: user.email, name: user.name }, secret, { expiresIn: env_1.env.JWT_EXPIRES_IN } // 15m
+        return jsonwebtoken_1.default.sign({ userId: user.id, email: user.email, name: user.name, role: user.role }, secret, { expiresIn: env_1.env.JWT_EXPIRES_IN } // 15m
         );
     }
     async generateRefreshToken(userId) {
@@ -44,7 +44,7 @@ class AuthService {
         const accessToken = this.generateAccessToken(newUser);
         const refreshToken = await this.generateRefreshToken(newUser.id);
         return {
-            user: { id: newUser.id, email: newUser.email, name: newUser.name },
+            user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role },
             accessToken,
             refreshToken
         };
@@ -66,7 +66,7 @@ class AuthService {
         const accessToken = this.generateAccessToken(user);
         const refreshToken = await this.generateRefreshToken(user.id);
         return {
-            user: { id: user.id, email: user.email, name: user.name },
+            user: { id: user.id, email: user.email, name: user.name, role: user.role },
             accessToken,
             refreshToken
         };

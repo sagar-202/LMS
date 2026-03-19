@@ -28,7 +28,7 @@ export default function EditLessonsPage() {
         }
     }, [isAuthenticated, user, authLoading, router]);
 
-    const fetchCourseStructure = async () => {
+    const fetchCourseStructure = React.useCallback(async () => {
         if (!subjectId) return;
         try {
             const tree = await lmsApi.getSubjectTree(subjectId);
@@ -38,13 +38,13 @@ export default function EditLessonsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [subjectId]);
 
     useEffect(() => {
         if (isAuthenticated && subjectId) {
             fetchCourseStructure();
         }
-    }, [isAuthenticated, subjectId]);
+    }, [isAuthenticated, subjectId, fetchCourseStructure]);
 
     const handleAddLesson = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,7 +63,7 @@ export default function EditLessonsPage() {
             await fetchCourseStructure();
         } catch (err) {
             console.error('Failed to add lesson:', err);
-            alert('Failed to add lesson. Ensure you are the instructor of this course.');
+            window.alert('Failed to add lesson. Ensure you are the instructor of this course.');
         } finally {
             setSubmitting(false);
         }

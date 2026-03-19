@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { lmsApi, Subject } from '@/lib/api';
 import Button from '@/components/ui/Button';
-import Link from 'next/link';
 
 export default function InstructorDashboard() {
     const { isAuthenticated, user, loading: authLoading } = useAuthStore();

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "echo 'Using pre-compiled dist - run tsc locally to rebuild'",
+    "build": "tsc",
     "tsc": "tsc",
     "seed": "ts-node scripts/seed.ts"
   },

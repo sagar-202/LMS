@@ -31,10 +31,11 @@ export default function CreateCoursePage() {
         setError('');
 
         try {
-            const result = await lmsApi.createCourse(formData);
+            await lmsApi.createCourse(formData);
             router.push(`/instructor/dashboard`);
-        } catch (err: any) {
-            setError(err.message || 'Failed to create course. Please try again.');
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to create course. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }

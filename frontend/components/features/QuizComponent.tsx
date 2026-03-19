@@ -46,7 +46,7 @@ export default function QuizComponent({ lessonId }: QuizComponentProps) {
         }));
 
         if (answersArray.length < quiz.questions.length) {
-            alert('Please answer all questions before submitting.');
+            window.alert('Please answer all questions before submitting.');
             return;
         }
 
@@ -56,7 +56,7 @@ export default function QuizComponent({ lessonId }: QuizComponentProps) {
             setResult(data);
         } catch (err) {
             console.error('Quiz submission failed:', err);
-            alert('Failed to submit quiz. Please try again.');
+            window.alert('Failed to submit quiz. Please try again.');
         } finally {
             setSubmitting(false);
         }

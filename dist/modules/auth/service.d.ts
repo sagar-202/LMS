@@ -6,6 +6,7 @@ export declare class AuthService {
             id: number;
             email: string;
             name: string;
+            role: import("../users/repository").UserRole;
         };
         accessToken: string;
         refreshToken: string;
@@ -15,6 +16,7 @@ export declare class AuthService {
             id: number;
             email: string;
             name: string;
+            role: import("../users/repository").UserRole;
         };
         accessToken: string;
         refreshToken: string;
