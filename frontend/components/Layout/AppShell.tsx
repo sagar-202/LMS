@@ -21,6 +21,10 @@ export default function AppShell({ children }: AppShellProps) {
 
     // Do not show header on auth pages
     const isAuthPage = pathname.startsWith('/auth');
+    
+    // Define public routes that don't need to wait for auth initialization to show content
+    const publicRoutes = ['/', '/courses'];
+    const isPublicRoute = publicRoutes.includes(pathname);
 
     React.useEffect(() => {
         initializeAuth();
@@ -36,7 +40,8 @@ export default function AppShell({ children }: AppShellProps) {
         return <>{children}</>;
     }
 
-    if (!isInitialized) {
+    // Only block the entire page for non-public routes while initializing
+    if (!isInitialized && !isPublicRoute) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
@@ -100,7 +105,9 @@ export default function AppShell({ children }: AppShellProps) {
                                 )}
                             </button>
 
-                            {isAuthenticated ? (
+                            {!isInitialized ? (
+                                <div className="w-32 h-10 bg-gray-50 dark:bg-gray-800 animate-pulse rounded-2xl border border-gray-100 dark:border-gray-700"></div>
+                            ) : isAuthenticated ? (
                                 <div className="relative">
                                     <button
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
