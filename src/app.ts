@@ -10,6 +10,8 @@ import videosRoutes from './modules/videos/routes';
 import progressRoutes from './modules/progress/routes';
 import enrollmentRoutes from './modules/enrollment/routes';
 import healthRoutes from './modules/health/routes';
+import certificatesRoutes from './modules/certificates/routes';
+import path from 'path';
 
 const app: Application = express();
 
@@ -25,6 +27,9 @@ app.use(cookieParser());
 // Request Logger
 app.use(requestLogger);
 
+// Static files for certificates
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // Health Check Route
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'UP', message: 'LMS Backend is running' });
@@ -37,6 +42,7 @@ app.use('/api/videos', videosRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api', enrollmentRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/certificates', certificatesRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response, next: NextFunction) => {
