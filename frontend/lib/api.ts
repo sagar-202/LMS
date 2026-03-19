@@ -105,6 +105,14 @@ export interface Certificate {
     certificate_url: string;
 }
 
+export interface Attachment {
+    id: number;
+    lesson_id: number;
+    file_url: string;
+    file_type: string;
+    created_at: string;
+}
+
 export interface CommentNode {
     id: number;
     content: string;
@@ -200,4 +208,8 @@ export const lmsApi = {
             method: 'POST',
             body: JSON.stringify({ lessonId, content, parentId }),
         }),
+
+    // Attachment APIs
+    getAttachments: (lessonId: number | string) =>
+        apiFetch<Attachment[]>(`/lessons/${lessonId}/attachments`),
 };

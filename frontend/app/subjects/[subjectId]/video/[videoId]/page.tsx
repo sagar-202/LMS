@@ -7,6 +7,9 @@ import { lmsApi, VideoDetail } from '@/lib/api';
 import VideoPlayer from '@/components/Video/VideoPlayer';
 import { sendProgress, markVideoCompleted } from '@/lib/progress';
 import { useSidebarStore } from '@/store/sidebarStore';
+import QuizComponent from '@/components/features/QuizComponent';
+import CommentsSection from '@/components/features/CommentsSection';
+import AttachmentsList from '@/components/features/AttachmentsList';
 
 export default function VideoLessonPage() {
     const params = useParams();
@@ -196,11 +199,21 @@ export default function VideoLessonPage() {
                         </div>
                     </div>
 
-                    <div className="prose prose-blue dark:prose-invert max-w-none">
+                    <div className="prose prose-blue dark:prose-invert max-w-none mb-10">
                         <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed font-medium">
                             {video.description || 'Master the concepts presented in this lesson through structured video guidance and hands-on practice.'}
                         </p>
                     </div>
+
+                    {/* Lesson Attachments */}
+                    <div className="border-t border-gray-100 dark:border-gray-700 pt-8 mt-8">
+                        <AttachmentsList lessonId={video.id} />
+                    </div>
+                </div>
+
+                {/* Quiz Section */}
+                <div className="mb-12">
+                    <QuizComponent lessonId={video.id} />
                 </div>
 
                 {/* Bottom Navigation */}
@@ -246,6 +259,15 @@ export default function VideoLessonPage() {
                             '✨ Completed'
                         )}
                     </button>
+                </div>
+
+                {/* Discussion Section */}
+                <div className="mt-20">
+                    <div className="flex items-center gap-4 mb-8">
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Lesson Discussion</h2>
+                        <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800"></div>
+                    </div>
+                    <CommentsSection lessonId={video.id} />
                 </div>
             </div>
         </div>

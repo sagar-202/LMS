@@ -11,6 +11,7 @@ import { getYoutubeThumbnail } from '@/lib/youtube';
 import ProgressRing from '@/components/ui/ProgressRing';
 
 import Image from 'next/image';
+import CertificateViewer from '@/components/features/CertificateViewer';
 
 interface SubjectWithProgress extends Subject {
     progress?: SubjectProgress;
@@ -284,6 +285,11 @@ export default function DashboardPage() {
                     </section>
                 )}
 
+                </div>
+
+                {/* Achievement Section */}
+                <div className="mt-12">
+                    <CertificateViewer />
                 </div>
             </div>
         </div>
