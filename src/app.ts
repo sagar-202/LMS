@@ -13,6 +13,7 @@ import healthRoutes from './modules/health/routes';
 import certificatesRoutes from './modules/certificates/routes';
 import quizzesRoutes from './modules/quizzes/routes';
 import instructorRoutes from './modules/instructor/routes';
+import attachmentsRoutes from './modules/attachments/routes';
 import path from 'path';
 
 const app: Application = express();
@@ -47,6 +48,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/certificates', certificatesRoutes);
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/instructor', instructorRoutes);
+app.use('/api', attachmentsRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response, next: NextFunction) => {
