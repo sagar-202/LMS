@@ -83,10 +83,10 @@ export interface Quiz {
     passing_score: number;
     questions: {
         id: number;
-        content: string;
+        question_text: string;
         answers: {
             id: number;
-            content: string;
+            answer_text: string;
         }[];
     }[];
 }

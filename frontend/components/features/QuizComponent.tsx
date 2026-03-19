@@ -115,7 +115,7 @@ export default function QuizComponent({ lessonId }: QuizComponentProps) {
                                 {qIdx + 1}
                             </span>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-                                {question.content}
+                                {question.question_text}
                             </h3>
                         </div>
                         <div className="grid grid-cols-1 gap-3 pl-12">
@@ -129,7 +129,7 @@ export default function QuizComponent({ lessonId }: QuizComponentProps) {
                                             : 'border-gray-50 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-gray-600 dark:text-gray-400 hover:border-blue-200 dark:hover:border-blue-800'
                                     }`}
                                 >
-                                    {answer.content}
+                                    {answer.answer_text}
                                 </button>
                             ))}
                         </div>
