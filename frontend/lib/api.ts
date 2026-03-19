@@ -77,6 +77,44 @@ export interface LastWatchedProgress {
     total_lessons: number;
 }
 
+export interface Quiz {
+    id: number;
+    title: string;
+    passing_score: number;
+    questions: {
+        id: number;
+        content: string;
+        answers: {
+            id: number;
+            content: string;
+        }[];
+    }[];
+}
+
+export interface QuizResult {
+    score: number;
+    passed: boolean;
+    attempt_id: number;
+}
+
+export interface Certificate {
+    id: number;
+    subject_id: number;
+    subject_title: string;
+    issued_at: string;
+    certificate_url: string;
+}
+
+export interface CommentNode {
+    id: number;
+    content: string;
+    user_name: string;
+    user_role: string;
+    created_at: string;
+    parent_id: number | null;
+    replies: CommentNode[];
+}
+
 export const lmsApi = {
     getSubjects: () => apiFetch<Subject[]>('/subjects'),
 
@@ -132,5 +170,34 @@ export const lmsApi = {
         apiFetch<{ videoId: number; sectionId: number }>('/instructor/lessons', {
             method: 'POST',
             body: JSON.stringify({ subjectId, sectionTitle, lessonData }),
+        }),
+
+    // Quiz APIs
+    getQuizByLessonId: (lessonId: number | string) =>
+        apiFetch<Quiz | null>(`/quizzes/${lessonId}`),
+
+    submitQuiz: (lessonId: number | string, answers: { questionId: number, answerId: number }[]) =>
+        apiFetch<QuizResult>('/quizzes/submit', {
+            method: 'POST',
+            body: JSON.stringify({ lessonId, answers }),
+        }),
+
+    // Certificate APIs
+    generateCertificate: (subjectId: number | string) =>
+        apiFetch<{ success: boolean; certificateId: number; pdfUrl: string }>(`/certificates/generate/${subjectId}`, {
+            method: 'POST',
+        }),
+
+    getMyCertificates: () =>
+        apiFetch<Certificate[]>('/certificates/my'),
+
+    // Comment APIs
+    getComments: (lessonId: number | string) =>
+        apiFetch<CommentNode[]>(`/comments/${lessonId}`),
+
+    addComment: (lessonId: number | string, content: string, parentId: number | null = null) =>
+        apiFetch<CommentNode>('/comments', {
+            method: 'POST',
+            body: JSON.stringify({ lessonId, content, parentId }),
         }),
 };
