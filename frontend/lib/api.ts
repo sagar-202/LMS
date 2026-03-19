@@ -176,10 +176,10 @@ export const lmsApi = {
     getQuizByLessonId: (lessonId: number | string) =>
         apiFetch<Quiz | null>(`/quizzes/${lessonId}`),
 
-    submitQuiz: (lessonId: number | string, answers: { questionId: number, answerId: number }[]) =>
+    submitQuiz: (quizId: number, answers: { questionId: number, answerId: number }[]) =>
         apiFetch<QuizResult>('/quizzes/submit', {
             method: 'POST',
-            body: JSON.stringify({ lessonId, answers }),
+            body: JSON.stringify({ quizId, answers }),
         }),
 
     // Certificate APIs

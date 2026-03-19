@@ -52,7 +52,7 @@ export default function QuizComponent({ lessonId }: QuizComponentProps) {
 
         setSubmitting(true);
         try {
-            const data = await lmsApi.submitQuiz(lessonId, answersArray);
+            const data = await lmsApi.submitQuiz(quiz.id, answersArray);
             setResult(data);
         } catch (err) {
             console.error('Quiz submission failed:', err);

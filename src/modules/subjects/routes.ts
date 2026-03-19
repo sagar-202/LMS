@@ -10,13 +10,7 @@ router.get('/:subjectId', subjectsController.getById);
 router.get('/:subjectId/tree', subjectsController.getTree);
 router.get('/:subjectId/first-video', protect, subjectsController.getSmartResume);
 
-// RBAC Protected Routes
-router.post('/', protect as any, authorizeRoles('instructor', 'admin') as any, (req, res) => {
-    res.status(201).json({ message: 'Course creation initialized (Instructor/Admin only)' });
-});
-
-router.post('/:subjectId/lessons', protect as any, authorizeRoles('instructor', 'admin') as any, (req, res) => {
-    res.status(201).json({ message: 'Lesson upload initialized (Instructor/Admin only)' });
-});
+// All public subject routes go here.
+// Instructor management is handled in src/modules/instructor/routes.ts
 
 export default router;
