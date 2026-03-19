@@ -11,6 +11,7 @@ import progressRoutes from './modules/progress/routes';
 import enrollmentRoutes from './modules/enrollment/routes';
 import healthRoutes from './modules/health/routes';
 import certificatesRoutes from './modules/certificates/routes';
+import quizzesRoutes from './modules/quizzes/routes';
 import path from 'path';
 
 const app: Application = express();
@@ -43,6 +44,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api', enrollmentRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/certificates', certificatesRoutes);
+app.use('/api/quizzes', quizzesRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response, next: NextFunction) => {
