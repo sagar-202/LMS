@@ -2,11 +2,14 @@ import db from '../../config/db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
 // Define the User interface based on the database schema
+export type UserRole = 'student' | 'instructor' | 'admin';
+
 export interface User {
     id: number;
     email: string;
     password_hash: string;
     name: string;
+    role: UserRole;
     created_at: Date;
     updated_at: Date;
 }

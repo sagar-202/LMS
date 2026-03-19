@@ -9,7 +9,7 @@ export class AuthService {
     private generateAccessToken(user: User): string {
         const secret: jwt.Secret = env.JWT_SECRET;
         return jwt.sign(
-            { userId: user.id, email: user.email, name: user.name },
+            { userId: user.id, email: user.email, name: user.name, role: user.role },
             secret,
             { expiresIn: env.JWT_EXPIRES_IN as any } // 15m
         );
@@ -53,7 +53,7 @@ export class AuthService {
         const refreshToken = await this.generateRefreshToken(newUser.id);
 
         return {
-            user: { id: newUser.id, email: newUser.email, name: newUser.name },
+            user: { id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role },
             accessToken,
             refreshToken
         };
@@ -79,7 +79,7 @@ export class AuthService {
         const refreshToken = await this.generateRefreshToken(user.id);
 
         return {
-            user: { id: user.id, email: user.email, name: user.name },
+            user: { id: user.id, email: user.email, name: user.name, role: user.role },
             accessToken,
             refreshToken
         };
