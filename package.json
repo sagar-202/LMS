@@ -8,7 +8,8 @@
     "build": "tsc",
     "tsc": "tsc",
     "seed": "ts-node scripts/seed.ts",
-    "migrate": "ts-node src/scripts/migrate.ts"
+    "migrate": "ts-node src/scripts/migrate.ts",
+    "seed:features": "ts-node src/scripts/seed_features.ts"
   },
   "keywords": [],
   "author": "",
