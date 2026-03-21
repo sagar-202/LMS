@@ -126,17 +126,19 @@ async function seed() {
         console.log(`✅ Inserted ${questions.length} questions with answers.`);
     }
 
-    // 6. Insert attachment for the video
-    const [existingAtt] = await c.query<any[]>('SELECT id FROM lesson_attachments WHERE lesson_id = ?', [targetVideoId]);
-    if (existingAtt.length > 0) {
-        console.log(`\n⏭️  Attachment already exists for video ${targetVideoId}, skipping.`);
-    } else {
-        await c.query(
-            'INSERT INTO lesson_attachments (lesson_id, file_url, file_type) VALUES (?, ?, ?)',
-            [targetVideoId, 'https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf', 'pdf']
-        );
-        console.log(`\n✅ Inserted PDF attachment for lesson ${targetVideoId}`);
-    }
+    // 6. Insert authentic attachments for the video
+    // Truncate previous dummy attachments if they exist to start fresh
+    await c.query('DELETE FROM lesson_attachments WHERE lesson_id = ?', [targetVideoId]);
+
+    await c.query(
+        'INSERT INTO lesson_attachments (lesson_id, file_url, file_type) VALUES (?, ?, ?)',
+        [targetVideoId, 'https://stanford.edu/~shervine/teaching/cs-229/cheatsheet-supervised-learning.pdf', 'pdf']
+    );
+    await c.query(
+        'INSERT INTO lesson_attachments (lesson_id, file_url, file_type) VALUES (?, ?, ?)',
+        [targetVideoId, 'https://github.com/afshinea/stanford-cs-229-machine-learning/raw/master/en/cheatsheet-supervised-learning.pdf', 'pdf']
+    );
+    console.log(`\n✅ Inserted authentic Stanford ML PDFs for lesson ${targetVideoId}`);
 
     await c.end();
     console.log('\n🎉 Seed complete! Refresh the lesson page to see Quiz and Attachments.');
