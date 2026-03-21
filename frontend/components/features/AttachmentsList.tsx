@@ -65,6 +65,18 @@ export default function AttachmentsList({ lessonId }: AttachmentsListProps) {
         );
     }
 
+    const formatAttachmentName = (url: string) => {
+        try {
+            const cleanUrl = url.replace(/\/+$/, '');
+            const slug = cleanUrl.split('/').pop() || 'Resource';
+            const withoutExt = slug.replace(/\.[^/.]+$/, "");
+            const unsluggified = withoutExt.replace(/[-_]/g, ' ');
+            return unsluggified.replace(/\b\w/g, c => c.toUpperCase()) || 'Lesson Material';
+        } catch {
+            return 'Lesson Material';
+        }
+    };
+
     return (
         <div className="space-y-3">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Lesson Materials</h3>
@@ -80,7 +92,7 @@ export default function AttachmentsList({ lessonId }: AttachmentsListProps) {
                         <div className="flex items-center gap-3">
                             {getFileIcon(attachment.file_type)}
                             <span className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
-                                {attachment.file_url.split('/').pop()}
+                                {formatAttachmentName(attachment.file_url)}
                             </span>
                         </div>
                         <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
