@@ -3,9 +3,9 @@ import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import { User } from '../users/repository';
 
 export class AuthRepository {
-    async createUser(email: string, passwordHash: string, name: string): Promise<User> {
-        const query = 'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)';
-        const [result] = await db.query<ResultSetHeader>(query, [email, passwordHash, name]);
+    async createUser(email: string, passwordHash: string, name: string, role: string = 'student'): Promise<User> {
+        const query = 'INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, ?)';
+        const [result] = await db.query<ResultSetHeader>(query, [email, passwordHash, name, role]);
 
         // Fetch and return the newly created user
         const [rows] = await db.query<RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [result.insertId]);

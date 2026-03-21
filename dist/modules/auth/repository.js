@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRepository = exports.AuthRepository = void 0;
 const db_1 = __importDefault(require("../../config/db"));
 class AuthRepository {
-    async createUser(email, passwordHash, name) {
-        const query = 'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)';
-        const [result] = await db_1.default.query(query, [email, passwordHash, name]);
+    async createUser(email, passwordHash, name, role = 'student') {
+        const query = 'INSERT INTO users (email, password_hash, name, role) VALUES (?, ?, ?, ?)';
+        const [result] = await db_1.default.query(query, [email, passwordHash, name, role]);
         // Fetch and return the newly created user
         const [rows] = await db_1.default.query('SELECT * FROM users WHERE id = ?', [result.insertId]);
         return rows[0];

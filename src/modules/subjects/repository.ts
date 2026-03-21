@@ -11,6 +11,7 @@ export interface Subject {
     lessons_count: number;
     total_duration: number;
     is_published: boolean;
+    thumbnail_url?: string;
     first_video_id?: string;
     created_at: Date;
     updated_at: Date;

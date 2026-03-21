@@ -1,7 +1,7 @@
 export declare class AuthService {
     private generateAccessToken;
     private generateRefreshToken;
-    register(email: string, passwordRaw: string, name: string): Promise<{
+    register(email: string, passwordRaw: string, name: string, role?: string): Promise<{
         user: {
             id: number;
             email: string;

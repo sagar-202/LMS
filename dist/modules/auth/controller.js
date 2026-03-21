@@ -15,12 +15,16 @@ class AuthController {
         console.log('--- Registration Request Received ---');
         console.log('Body:', req.body);
         try {
-            const { email, password, name } = req.body;
+            const { email, password, name, role = 'student' } = req.body;
             if (!email || !password || !name) {
                 console.log('Validation failed: missing fields');
                 return res.status(400).json({ message: 'Email, password, and name are required' });
             }
-            const { user, accessToken, refreshToken } = await service_1.authService.register(email, password, name);
+            const validRoles = ['student', 'instructor'];
+            if (!validRoles.includes(role)) {
+                return res.status(400).json({ message: 'Invalid role provided' });
+            }
+            const { user, accessToken, refreshToken } = await service_1.authService.register(email, password, name, role);
             this.setRefreshCookie(res, refreshToken);
             res.status(201).json({
                 success: true,

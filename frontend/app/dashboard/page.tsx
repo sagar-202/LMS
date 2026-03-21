@@ -45,6 +45,8 @@ export default function DashboardPage() {
                     lmsApi.getOverallStats()
                 ]);
                 
+                console.log('Dashboard Data Response:', { subjects, enrollmentData, lastWatchedData, statsData });
+                
                 setOverallStats(statsData);
                 setLastWatched(lastWatchedData);
                 
@@ -209,7 +211,14 @@ export default function DashboardPage() {
                         <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Active Learning</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {subjectsWithProgress.map((course) => {
-                                const thumbnail = getYoutubeThumbnail(course.youtube_url);
+                                const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api', '') || 'http://localhost:3000';
+                                const rawThumb = course?.thumbnail_url || course?.thumbnail;
+                                const fallbackThumb = getYoutubeThumbnail(course?.youtube_url) || '/placeholder-course.jpg';
+                                
+                                const thumbnail = rawThumb 
+                                    ? (rawThumb.startsWith('http') || rawThumb.startsWith('data:') ? rawThumb : `${API_BASE_URL}/uploads/${rawThumb.startsWith('/') ? rawThumb.slice(1) : rawThumb}`)
+                                    : fallbackThumb;
+
                                 return (
                                 <div 
                                     key={course.id} 

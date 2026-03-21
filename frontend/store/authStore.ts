@@ -18,7 +18,7 @@ interface AuthState {
     initializeAuth: () => Promise<void>;
     setAccessToken: (token: string) => void;
     login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
+    register: (name: string, email: string, password: string, role?: string) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -106,13 +106,13 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
     },
 
-    register: async (name, email, password) => {
+    register: async (name, email, password, role = 'student') => {
         set({ loading: true });
         try {
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ name, email, password, role }),
                 credentials: 'include',
             });
 

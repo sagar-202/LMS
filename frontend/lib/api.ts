@@ -11,6 +11,7 @@ export interface Subject {
     total_duration: number;
     is_published: boolean;
     thumbnail?: string;
+    thumbnail_url?: string;
     youtube_url?: string;
 }
 

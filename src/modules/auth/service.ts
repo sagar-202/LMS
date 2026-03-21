@@ -32,7 +32,7 @@ export class AuthService {
         return refreshToken;
     }
 
-    async register(email: string, passwordRaw: string, name: string) {
+    async register(email: string, passwordRaw: string, name: string, role: string = 'student') {
         // 1. Check if user already exists
         const existingUser = await authRepository.findUserByEmail(email);
         if (existingUser) {
@@ -46,7 +46,7 @@ export class AuthService {
         const passwordHash = await bcrypt.hash(passwordRaw, saltRounds);
 
         // 3. Store user
-        const newUser = await authRepository.createUser(email, passwordHash, name);
+        const newUser = await authRepository.createUser(email, passwordHash, name, role);
 
         // 4. Issue tokens
         const accessToken = this.generateAccessToken(newUser);

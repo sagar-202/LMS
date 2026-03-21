@@ -18,7 +18,23 @@ export default function CourseCard({
     const router = useRouter();
     const [isEnrolling, setIsEnrolling] = useState(false);
 
-    const thumbnail = getYoutubeThumbnail(subject.youtube_url);
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api', '') || 'http://localhost:3000';
+    
+    const getThumbnailUrl = () => {
+        if (!subject.thumbnail_url && !subject.thumbnail) {
+            // Fallback to youtube thumbnail if existing
+            const ytThumb = getYoutubeThumbnail(subject.youtube_url);
+            return ytThumb || '/placeholder-course.jpg';
+        }
+        
+        const thumb = subject.thumbnail_url || subject.thumbnail || '';
+        if (thumb.startsWith('http') || thumb.startsWith('data:')) return thumb;
+        
+        const relativeUrl = thumb.startsWith('/') ? thumb.slice(1) : thumb;
+        return `${API_BASE_URL}/uploads/${relativeUrl}`;
+    };
+
+    const thumbnail = getThumbnailUrl();
 
     const handleEnroll = async (e: React.MouseEvent) => {
         e.preventDefault();

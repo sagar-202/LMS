@@ -27,7 +27,7 @@ class AuthService {
         await repository_1.authRepository.storeRefreshToken(userId, tokenHash, expiresAt);
         return refreshToken;
     }
-    async register(email, passwordRaw, name) {
+    async register(email, passwordRaw, name, role = 'student') {
         // 1. Check if user already exists
         const existingUser = await repository_1.authRepository.findUserByEmail(email);
         if (existingUser) {
@@ -39,7 +39,7 @@ class AuthService {
         const saltRounds = 10;
         const passwordHash = await bcrypt_1.default.hash(passwordRaw, saltRounds);
         // 3. Store user
-        const newUser = await repository_1.authRepository.createUser(email, passwordHash, name);
+        const newUser = await repository_1.authRepository.createUser(email, passwordHash, name, role);
         // 4. Issue tokens
         const accessToken = this.generateAccessToken(newUser);
         const refreshToken = await this.generateRefreshToken(newUser.id);
