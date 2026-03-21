@@ -126,19 +126,18 @@ async function seed() {
         console.log(`✅ Inserted ${questions.length} questions with answers.`);
     }
 
-    // 6. Insert authentic attachments for the video
-    // Truncate previous dummy attachments if they exist to start fresh
+    // 6. Insert free source web link attachments for the video
     await c.query('DELETE FROM lesson_attachments WHERE lesson_id = ?', [targetVideoId]);
 
     await c.query(
         'INSERT INTO lesson_attachments (lesson_id, file_url, file_type) VALUES (?, ?, ?)',
-        [targetVideoId, 'https://stanford.edu/~shervine/teaching/cs-229/cheatsheet-supervised-learning.pdf', 'pdf']
+        [targetVideoId, 'https://developers.google.com/machine-learning/crash-course', 'link']
     );
     await c.query(
         'INSERT INTO lesson_attachments (lesson_id, file_url, file_type) VALUES (?, ?, ?)',
-        [targetVideoId, 'https://github.com/afshinea/stanford-cs-229-machine-learning/raw/master/en/cheatsheet-supervised-learning.pdf', 'pdf']
+        [targetVideoId, 'https://en.wikipedia.org/wiki/Machine_learning', 'link']
     );
-    console.log(`\n✅ Inserted authentic Stanford ML PDFs for lesson ${targetVideoId}`);
+    console.log(`\n✅ Inserted free source web links for lesson ${targetVideoId}`);
 
     await c.end();
     console.log('\n🎉 Seed complete! Refresh the lesson page to see Quiz and Attachments.');
