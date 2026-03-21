@@ -9,8 +9,6 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { getYoutubeThumbnail } from '@/lib/youtube';
 import ProgressRing from '@/components/ui/ProgressRing';
-
-import Image from 'next/image';
 import CertificateViewer from '@/components/features/CertificateViewer';
 
 interface SubjectWithProgress extends Subject {
@@ -226,12 +224,11 @@ export default function DashboardPage() {
                                     className="group bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-6 shadow-xl transition-all duration-300 flex flex-col gap-6 cursor-pointer hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(59,130,246,0.25)] hover:ring-2 hover:ring-blue-500/40 hover:border-blue-500"
                                 >
                                     <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
-                                        <Image
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
                                             src={thumbnail || '/placeholder-course.jpg'}
                                             alt={course.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
                                         <div className="absolute top-4 right-4 z-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-1 rounded-full shadow-lg">
                                             <ProgressRing percentage={course.progress?.percent_complete || 0} size={40} strokeWidth={3} />
