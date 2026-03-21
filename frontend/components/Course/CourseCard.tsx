@@ -65,7 +65,7 @@ export default function CourseCard({
             <div className="aspect-video relative overflow-hidden rounded-t-xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src={thumbnail || '/placeholder-course.jpg'}
+                    src={thumbnail || 'https://placehold.co/800x450/2563eb/ffffff?text=Course+Thumbnail'}
                     alt={subject.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

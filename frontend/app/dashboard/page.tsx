@@ -226,7 +226,7 @@ export default function DashboardPage() {
                                     <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
-                                            src={thumbnail || '/placeholder-course.jpg'}
+                                            src={thumbnail || 'https://placehold.co/800x450/2563eb/ffffff?text=Course+Thumbnail'}
                                             alt={course.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
