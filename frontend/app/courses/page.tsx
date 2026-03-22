@@ -15,13 +15,16 @@ export default function CoursesPage() {
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const [subjectsData, enrollmentData] = await Promise.all([
-                    lmsApi.getSubjects(),
-                    lmsApi.getEnrollments()
-                ]);
+                const subjectsData = await lmsApi.getSubjects();
                 setSubjects(subjectsData);
                 setFilteredSubjects(subjectsData);
-                setEnrolledSubjectIds(enrollmentData.data || []);
+
+                try {
+                    const enrollmentData = await lmsApi.getEnrollments();
+                    setEnrolledSubjectIds(enrollmentData.data || []);
+                } catch (e) {
+                    console.warn('Enrollments could not be fetched:', e);
+                }
             } catch (err) {
                 console.error('Failed to fetch data:', err);
             } finally {

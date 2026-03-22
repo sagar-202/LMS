@@ -109,13 +109,24 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
 
     if (!response.ok) {
         const errorText = await response.text().catch(() => '');
-        const errorData = errorText ? JSON.parse(errorText) : {};
+        let errorData: any = {};
+        try {
+            errorData = errorText ? JSON.parse(errorText) : {};
+        } catch {
+            errorData = { message: `Request failed with status ${response.status}` };
+        }
         throw new Error(errorData.message || 'API request failed');
     }
 
     // Safe JSON parsing that handles empty bodies
     const text = await response.text();
-    const result = text ? JSON.parse(text) : null;
+    let result: any = null;
+    try {
+        result = text ? JSON.parse(text) : null;
+    } catch {
+        console.error('Failed to parse JSON response:', text);
+        result = null;
+    }
 
     // If the response follows our { success: true, data: ... } pattern, extract the data
     if (result && typeof result === 'object' && 'success' in result && 'data' in result) {

@@ -36,20 +36,24 @@ export default function DashboardPage() {
             if (!isAuthenticated) return;
             setLoading(true);
             try {
-                const [subjects, enrollmentData, lastWatchedData, statsData] = await Promise.all([
-                    lmsApi.getSubjects(),
+                // 1. Fetch subjects first (Most critical)
+                const subjects = await lmsApi.getSubjects();
+                
+                // 2. Fetch other data independently or in parallel with individual catches
+                const [enrollmentDataResult, lastWatchedDataResult, statsDataResult] = await Promise.allSettled([
                     lmsApi.getEnrollments(),
                     lmsApi.getLastWatched(),
                     lmsApi.getOverallStats()
                 ]);
-                
-                console.log('Dashboard Data Response:', { subjects, enrollmentData, lastWatchedData, statsData });
-                console.log('Setting Overall Stats:', statsData);
-                
+
+                const enrollmentData = enrollmentDataResult.status === 'fulfilled' ? enrollmentDataResult.value : { data: [] };
+                const lastWatchedData = lastWatchedDataResult.status === 'fulfilled' ? lastWatchedDataResult.value : null;
+                const statsData = statsDataResult.status === 'fulfilled' ? statsDataResult.value : { completed_lessons: 0, total_lessons: 0 };
+
                 setOverallStats(statsData);
                 setLastWatched(lastWatchedData);
                 
-                const enrollmentIds = enrollmentData.data || [];
+                const enrollmentIds: number[] = enrollmentData.data || [];
 
                 // Filter subjects to only those the user is enrolled in
                 const enrolledSubjects = subjects.filter((s: Subject) => enrollmentIds.includes(s.id));
