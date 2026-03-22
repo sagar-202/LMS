@@ -1,63 +1,65 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.askChatbot = askChatbot;
-const HF_API_URL = 'https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2';
-const HF_TIMEOUT_MS = 20_000;
+// HuggingFace Inference API — OpenAI-compatible chat completions endpoint
+const HF_BASE_URL = 'https://router.huggingface.co/hf-inference/v1';
+const HF_MODEL = 'mistralai/Mistral-7B-Instruct-v0.2';
+const HF_TIMEOUT_MS = 25_000;
 /**
- * Build an instructional prompt scoped to the student's current lesson.
- * Falls back to a general LMS assistant prompt when no lesson context is given.
+ * Build the messages array for the chat completions API.
  */
-function buildPrompt(message, ctx) {
+function buildMessages(message, ctx) {
     if (ctx.courseTitle && ctx.lessonTitle) {
-        return `<s>[INST]
-You are a dedicated AI tutor for the course "${ctx.courseTitle}", lesson "${ctx.lessonTitle}".
-You ONLY help based on the lesson content below.
-
-LESSON CONTENT:
-${ctx.lessonContent || '(No content provided — use general knowledge about the lesson topic.)'}
-
-STRICT RULES:
-1. Answer ONLY based on the lesson content and course context.
-2. If the question is outside this lesson, respond: "This question is outside the current lesson. Let me guide you based on what you are learning." Then connect it back.
-3. Always explain step-by-step, use simple language, and give examples related to THIS course.
-4. Structure: Explanation → Example → Key takeaway.
-5. Do NOT say "as an AI model". Keep answers concise.
-
-STUDENT QUESTION:
-${message}
-
-FINAL ANSWER: [/INST]`;
+        return [
+            {
+                role: 'system',
+                content: [
+                    `You are a dedicated AI tutor for the course "${ctx.courseTitle}", lesson "${ctx.lessonTitle}".`,
+                    `You ONLY help based on the lesson content below.`,
+                    ``,
+                    `LESSON CONTENT:`,
+                    ctx.lessonContent || '(Use general knowledge about this lesson topic.)',
+                    ``,
+                    `STRICT RULES:`,
+                    `1. Answer ONLY based on the lesson content and course context.`,
+                    `2. If the question is outside this lesson, say: "This is outside the current lesson." Then relate it back.`,
+                    `3. Explain step-by-step, use simple language, give course-specific examples.`,
+                    `4. Structure: Explanation → Example → Key takeaway.`,
+                    `5. Be concise. Do NOT say "as an AI".`,
+                ].join('\n'),
+            },
+            { role: 'user', content: message },
+        ];
     }
-    // Generic fallback — no lesson context
-    return `<s>[INST]
-You are a helpful AI assistant for an online Learning Management System called VibeLMS.
-Answer the following student question concisely and clearly:
-
-${message}
-[/INST]`;
+    return [
+        {
+            role: 'system',
+            content: 'You are a helpful AI assistant for an online Learning Management System called VibeLMS. Answer student questions concisely and clearly.',
+        },
+        { role: 'user', content: message },
+    ];
 }
 async function askChatbot(message, ctx = {}) {
     const apiKey = process.env.HF_API_KEY;
     if (!apiKey) {
         throw new Error('HF_API_KEY is not configured on this server.');
     }
-    const prompt = buildPrompt(message, ctx);
+    const messages = buildMessages(message, ctx);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), HF_TIMEOUT_MS);
     try {
-        const response = await fetch(HF_API_URL, {
+        const response = await fetch(`${HF_BASE_URL}/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                inputs: prompt,
-                parameters: {
-                    max_new_tokens: 512,
-                    temperature: 0.7,
-                    return_full_text: false, // only return generated text, not the echoed prompt
-                },
+                model: HF_MODEL,
+                messages,
+                max_tokens: 512,
+                temperature: 0.7,
+                stream: false,
             }),
             signal: controller.signal,
         });
@@ -66,12 +68,8 @@ async function askChatbot(message, ctx = {}) {
             throw new Error(`Hugging Face API error [${response.status}]: ${errorText}`);
         }
         const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-            const first = data[0];
-            const reply = (first.generated_text ?? '').trim();
-            return { reply: reply || 'No response generated.' };
-        }
-        return { reply: 'No response generated.' };
+        const reply = data.choices?.[0]?.message?.content?.trim() ?? '';
+        return { reply: reply || 'No response generated.' };
     }
     catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
