@@ -5,6 +5,18 @@ const router = express.Router();
 
 router.get('/seed', async (req, res) => {
     try {
+        // 0. Auto-Migrate Schemas safely
+        const schemas = [
+            `CREATE TABLE IF NOT EXISTS quizzes (id INT AUTO_INCREMENT PRIMARY KEY, video_id INT NOT NULL, title VARCHAR(255) NOT NULL, passing_score INT DEFAULT 70)`,
+            `CREATE TABLE IF NOT EXISTS questions (id INT AUTO_INCREMENT PRIMARY KEY, quiz_id INT NOT NULL, question_text TEXT NOT NULL, type VARCHAR(50) DEFAULT 'multiple_choice')`,
+            `CREATE TABLE IF NOT EXISTS answers (id INT AUTO_INCREMENT PRIMARY KEY, question_id INT NOT NULL, answer_text TEXT NOT NULL, is_correct BOOLEAN DEFAULT FALSE)`,
+            `CREATE TABLE IF NOT EXISTS attachments (id INT AUTO_INCREMENT PRIMARY KEY, video_id INT NOT NULL, title VARCHAR(255) NOT NULL, file_url VARCHAR(255) NOT NULL, file_type ENUM('pdf','zip','doc','docx','other') DEFAULT 'other', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`
+        ];
+        
+        for (const sql of schemas) {
+            try { await db.query(sql); } catch(e) { console.warn('Migration warning:', e); }
+        }
+
         // 1. Seed Quizzes
         const [videos] = await db.query('SELECT id, section_id FROM videos');
         let quizzesSeeded = 0;
@@ -15,9 +27,9 @@ router.get('/seed', async (req, res) => {
             if ((q as any[]).length === 0) {
                 const [r] = await db.query('INSERT INTO quizzes (video_id, title) VALUES (?, ?)', [video.id, 'Knowledge Check']);
                 const quizId = (r as any).insertId;
-                const [rq] = await db.query('INSERT INTO questions (quiz_id, text, type) VALUES (?, ?, ?)', [quizId, 'What is the primary concept discussed in this lesson?', 'multiple_choice']);
+                const [rq] = await db.query('INSERT INTO questions (quiz_id, question_text, type) VALUES (?, ?, ?)', [quizId, 'What is the primary concept discussed in this lesson?', 'multiple_choice']);
                 const qId = (rq as any).insertId;
-                await db.query(`INSERT INTO answers (question_id, text, is_correct) VALUES 
+                await db.query(`INSERT INTO answers (question_id, answer_text, is_correct) VALUES 
                     (?, ?, true), (?, ?, false), (?, ?, false)`, 
                     [qId, 'The core architecture and implementation details.', qId, 'A completely unrelated topic.', qId, 'General programming history.']
                 );
