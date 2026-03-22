@@ -1,15 +1,58 @@
 const HF_API_URL = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
-const HF_TIMEOUT_MS = 20_000; // 20 second timeout
+const HF_TIMEOUT_MS = 20_000;
+
+export interface ChatbotContext {
+    courseTitle?: string;
+    lessonTitle?: string;
+    lessonContent?: string;
+}
 
 export interface ChatbotReply {
     reply: string;
 }
 
-export async function askChatbot(message: string): Promise<ChatbotReply> {
+/**
+ * Build an instructional prompt scoped to the student's current lesson.
+ * Falls back to a general LMS assistant prompt when no lesson context is given.
+ */
+function buildPrompt(message: string, ctx: ChatbotContext): string {
+    if (ctx.courseTitle && ctx.lessonTitle) {
+        return `<s>[INST]
+You are a dedicated AI tutor for the course "${ctx.courseTitle}", lesson "${ctx.lessonTitle}".
+You ONLY help based on the lesson content below.
+
+LESSON CONTENT:
+${ctx.lessonContent || '(No content provided — use general knowledge about the lesson topic.)'}
+
+STRICT RULES:
+1. Answer ONLY based on the lesson content and course context.
+2. If the question is outside this lesson, respond: "This question is outside the current lesson. Let me guide you based on what you are learning." Then connect it back.
+3. Always explain step-by-step, use simple language, and give examples related to THIS course.
+4. Structure: Explanation → Example → Key takeaway.
+5. Do NOT say "as an AI model". Keep answers concise.
+
+STUDENT QUESTION:
+${message}
+
+FINAL ANSWER: [/INST]`;
+    }
+
+    // Generic fallback — no lesson context
+    return `<s>[INST]
+You are a helpful AI assistant for an online Learning Management System called VibeLMS.
+Answer the following student question concisely and clearly:
+
+${message}
+[/INST]`;
+}
+
+export async function askChatbot(message: string, ctx: ChatbotContext = {}): Promise<ChatbotReply> {
     const apiKey = process.env.HF_API_KEY;
     if (!apiKey) {
         throw new Error('HF_API_KEY is not configured on this server.');
     }
+
+    const prompt = buildPrompt(message, ctx);
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), HF_TIMEOUT_MS);
@@ -21,7 +64,14 @@ export async function askChatbot(message: string): Promise<ChatbotReply> {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
             },
-            body: JSON.stringify({ inputs: message }),
+            body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                    max_new_tokens: 512,
+                    temperature: 0.7,
+                    return_full_text: false, // only return generated text, not the echoed prompt
+                },
+            }),
             signal: controller.signal,
         });
 
@@ -32,14 +82,9 @@ export async function askChatbot(message: string): Promise<ChatbotReply> {
 
         const data = await response.json() as unknown;
 
-        // The HF Inference API returns an array: [{ generated_text: "..." }]
         if (Array.isArray(data) && data.length > 0) {
             const first = data[0] as { generated_text?: string };
-            const rawText = first.generated_text ?? '';
-            // Strip the original prompt from the reply if the model echoes it back
-            const reply = rawText.startsWith(message)
-                ? rawText.slice(message.length).trim()
-                : rawText.trim();
+            const reply = (first.generated_text ?? '').trim();
             return { reply: reply || 'No response generated.' };
         }
 

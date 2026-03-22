@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { apiFetch } from '@/lib/apiClient';
+import { useChatbotContextStore } from '@/store/chatbotContextStore';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -15,7 +16,7 @@ interface ChatbotResponse {
     reply: string;
 }
 
-// ─── Icons (inline SVG to avoid extra dependencies) ──────────────────────────
+// ─── Icons ───────────────────────────────────────────────────────────────────
 
 const BotIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6"
@@ -43,16 +44,11 @@ const CloseIcon = () => (
     </svg>
 );
 
-// ─── Typing indicator ────────────────────────────────────────────────────────
-
 const TypingDots = () => (
     <div className="flex gap-1 items-center py-1">
         {[0, 1, 2].map((i) => (
-            <span
-                key={i}
-                className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-            />
+            <span key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"
+                style={{ animationDelay: `${i * 0.15}s` }} />
         ))}
     </div>
 );
@@ -61,24 +57,31 @@ const TypingDots = () => (
 
 export default function Chatbot() {
     const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([
-        { id: 0, role: 'ai', text: '👋 Hi! I\'m your VibeLMS AI assistant. Ask me anything about your courses!' }
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Scroll to bottom whenever messages change
+    // Read the current lesson context set by the lesson page
+    const context = useChatbotContextStore((s) => s.context);
+
+    // Dynamic greeting — changes whenever the lesson changes
+    const greeting = context
+        ? `📖 I'm your AI tutor for **${context.lessonTitle}** (${context.courseTitle}). Ask me anything about this lesson!`
+        : `👋 Hi! I'm your VibeLMS AI assistant. Ask me anything about your courses!`;
+
+    // Reset chat and show new greeting whenever context changes
+    useEffect(() => {
+        setMessages([{ id: 0, role: 'ai', text: greeting }]);
+    }, [greeting]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, loading]);
 
-    // Focus input when chat opens
     useEffect(() => {
-        if (open) {
-            setTimeout(() => inputRef.current?.focus(), 150);
-        }
+        if (open) setTimeout(() => inputRef.current?.focus(), 150);
     }, [open]);
 
     const sendMessage = async () => {
@@ -91,43 +94,44 @@ export default function Chatbot() {
         setLoading(true);
 
         try {
+            const body: Record<string, unknown> = { message: text };
+            if (context) {
+                body.courseTitle = context.courseTitle;
+                body.lessonTitle = context.lessonTitle;
+                body.lessonContent = context.lessonContent;
+            }
+
             const data = await apiFetch<ChatbotResponse>('/chatbot', {
                 method: 'POST',
-                body: JSON.stringify({ message: text }),
+                body: JSON.stringify(body),
             });
 
-            const aiMsg: Message = {
+            setMessages(prev => [...prev, {
                 id: Date.now() + 1,
                 role: 'ai',
                 text: data.reply || 'Sorry, I didn\'t get a response. Please try again.'
-            };
-            setMessages(prev => [...prev, aiMsg]);
+            }]);
         } catch {
-            const errMsg: Message = {
+            setMessages(prev => [...prev, {
                 id: Date.now() + 1,
                 role: 'ai',
-                text: '⚠️ Sorry, I ran into an issue. Please try again in a moment.'
-            };
-            setMessages(prev => [...prev, errMsg]);
+                text: '⚠️ Something went wrong. Please try again in a moment.'
+            }]);
         } finally {
             setLoading(false);
         }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     };
 
     return (
         <>
-            {/* ── Chat Popup ── */}
             {open && (
                 <div
                     className="fixed bottom-24 right-5 sm:right-8 z-50 w-[360px] max-w-[calc(100vw-2.5rem)] flex flex-col rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.18)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.55)] overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 animate-in fade-in slide-in-from-bottom-4 duration-300"
-                    style={{ height: '460px' }}
+                    style={{ height: '480px' }}
                 >
                     {/* Header */}
                     <div className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex-shrink-0">
@@ -135,43 +139,48 @@ export default function Chatbot() {
                             <BotIcon />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="font-black text-sm tracking-tight">VibeLMS AI</p>
-                            <p className="text-[11px] text-blue-100 font-medium">Powered by Mistral</p>
+                            <p className="font-black text-sm tracking-tight">
+                                {context ? `${context.courseTitle}` : 'VibeLMS AI'}
+                            </p>
+                            <p className="text-[11px] text-blue-100 font-medium truncate">
+                                {context ? `📖 ${context.lessonTitle}` : 'Powered by Mistral'}
+                            </p>
                         </div>
-                        <button
-                            onClick={() => setOpen(false)}
+                        <button onClick={() => setOpen(false)}
                             className="w-8 h-8 bg-white/10 hover:bg-white/25 rounded-xl flex items-center justify-center transition-colors"
-                            aria-label="Close chat"
-                        >
+                            aria-label="Close chat">
                             <CloseIcon />
                         </button>
                     </div>
 
+                    {/* Context badge - only shown when inside a lesson */}
+                    {context && (
+                        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-950 border-b border-blue-100 dark:border-blue-900 flex-shrink-0">
+                            <p className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold text-center">
+                                🎯 Tutor mode active — answers scoped to this lesson
+                            </p>
+                        </div>
+                    )}
+
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gray-50 dark:bg-gray-950">
                         {messages.map((msg) => (
-                            <div
-                                key={msg.id}
-                                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
+                            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 {msg.role === 'ai' && (
                                     <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 mr-2 mt-0.5 text-white">
                                         <BotIcon />
                                     </div>
                                 )}
-                                <div
-                                    className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed break-words ${
-                                        msg.role === 'user'
-                                            ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-sm'
-                                            : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-tl-sm shadow-sm'
-                                    }`}
-                                >
+                                <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap ${
+                                    msg.role === 'user'
+                                        ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-sm'
+                                        : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-tl-sm shadow-sm'
+                                }`}>
                                     {msg.text}
                                 </div>
                             </div>
                         ))}
 
-                        {/* Typing indicator */}
                         {loading && (
                             <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 text-white">
@@ -194,7 +203,7 @@ export default function Chatbot() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Ask anything..."
+                                placeholder={context ? `Ask about ${context.lessonTitle}...` : 'Ask anything...'}
                                 disabled={loading}
                                 className="flex-1 bg-transparent text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none disabled:opacity-50"
                             />
@@ -202,8 +211,7 @@ export default function Chatbot() {
                                 onClick={sendMessage}
                                 disabled={loading || !input.trim()}
                                 className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 flex-shrink-0"
-                                aria-label="Send message"
-                            >
+                                aria-label="Send message">
                                 <SendIcon />
                             </button>
                         </div>
@@ -214,21 +222,10 @@ export default function Chatbot() {
                 </div>
             )}
 
-            {/* ── Floating Toggle Button ── */}
+            {/* Floating Toggle Button */}
             <button
                 onClick={() => setOpen(prev => !prev)}
-                className={`
-                    fixed bottom-5 right-5 sm:right-8 z-50
-                    w-14 h-14 rounded-full
-                    bg-gradient-to-br from-blue-600 to-indigo-600
-                    hover:from-blue-700 hover:to-indigo-700
-                    text-white shadow-[0_8px_30px_rgba(79,70,229,0.5)]
-                    hover:shadow-[0_12px_40px_rgba(79,70,229,0.7)]
-                    flex items-center justify-center
-                    transition-all duration-300
-                    hover:scale-110 active:scale-95
-                    ${open ? 'rotate-180' : 'rotate-0'}
-                `}
+                className={`fixed bottom-5 right-5 sm:right-8 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-[0_8px_30px_rgba(79,70,229,0.5)] hover:shadow-[0_12px_40px_rgba(79,70,229,0.7)] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${open ? 'rotate-180' : 'rotate-0'}`}
                 aria-label={open ? 'Close chatbot' : 'Open chatbot'}
             >
                 {open ? <CloseIcon /> : <BotIcon />}
