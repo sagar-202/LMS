@@ -44,6 +44,7 @@ export default function DashboardPage() {
                 ]);
                 
                 console.log('Dashboard Data Response:', { subjects, enrollmentData, lastWatchedData, statsData });
+                console.log('Setting Overall Stats:', statsData);
                 
                 setOverallStats(statsData);
                 setLastWatched(lastWatchedData);

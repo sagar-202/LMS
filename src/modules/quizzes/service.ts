@@ -47,7 +47,7 @@ export class QuizzesService {
             }
         });
 
-        const score = Math.round((correctCount / totalQuestions) * 100);
+        const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
         const isPassed = score >= quiz.passing_score;
 
         // 3. Save attempt
@@ -60,6 +60,9 @@ export class QuizzesService {
         }
 
         return {
+            score,
+            passed: isPassed,
+            attempt_id: attempt.id,
             attempt,
             correctCount,
             totalQuestions,
