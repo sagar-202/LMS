@@ -37,7 +37,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health Check Route
 app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'UP', message: 'LMS Backend is running', version: 'v1.2.final-resilience-' + Date.now() });
+  res.status(200).json({ status: 'UP', message: 'LMS Backend is running', version: 'v1.3.final-sync-' + Date.now() });
 });
 
 // Mount Routes
@@ -45,7 +45,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subjects', subjectsRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/progress', progressRoutes);
-app.use('/api', enrollmentRoutes); // Mounts /api/enrollments and /api/enroll/:id
+app.use('/api/enroll', enrollmentRoutes); // Mount for POST /api/enroll/:id
+app.use('/api/enrollments', enrollmentRoutes); // Mount for GET /api/enrollments
 app.use('/api/system', seedRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/certificates', certificatesRoutes);

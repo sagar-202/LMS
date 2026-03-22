@@ -7,7 +7,8 @@ const router = Router();
 // All enrollment routes require authentication
 router.use(protect);
 
-router.post('/enroll/:subjectId', enrollmentController.enroll);
-router.get('/enrollments', enrollmentController.getEnrollments);
+// Simplified routes to be relative to mount points
+router.post('/:subjectId', enrollmentController.enroll);
+router.get('/', enrollmentController.getEnrollments);
 
 export default router;
