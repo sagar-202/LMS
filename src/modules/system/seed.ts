@@ -24,29 +24,34 @@ router.get('/seed', async (req, res) => {
         let notesSeeded = 0;
 
         for (const video of videos as any[]) {
-            const [q] = await db.query('SELECT id FROM quizzes WHERE video_id = ?', [video.id]);
-            if ((q as any[]).length === 0) {
-                const [r] = await db.query('INSERT INTO quizzes (video_id, title) VALUES (?, ?)', [video.id, 'Knowledge Check']);
-                const quizId = (r as any).insertId;
-                const [rq] = await db.query('INSERT INTO questions (quiz_id, question_text, type) VALUES (?, ?, ?)', [quizId, 'What is the primary concept discussed in this lesson?', 'multiple_choice']);
-                const qId = (rq as any).insertId;
-                await db.query(`INSERT INTO answers (question_id, answer_text, is_correct) VALUES 
-                    (?, ?, true), (?, ?, false), (?, ?, false)`, 
-                    [qId, 'The core architecture and implementation details.', qId, 'A completely unrelated topic.', qId, 'General programming history.']
-                );
-                quizzesSeeded++;
-            }
+            // 1. Seed Quizzes
+            try {
+                const [q] = await db.query('SELECT id FROM quizzes WHERE video_id = ?', [video.id]);
+                if ((q as any[]).length === 0) {
+                    const [r] = await db.query('INSERT INTO quizzes (video_id, title) VALUES (?, ?)', [video.id, 'Knowledge Check']);
+                    const quizId = (r as any).insertId;
+                    const [rq] = await db.query('INSERT INTO questions (quiz_id, question_text) VALUES (?, ?)', [quizId, 'What is the primary concept discussed in this lesson?']);
+                    const qId = (rq as any).insertId;
+                    await db.query(`INSERT INTO answers (question_id, answer_text, is_correct) VALUES 
+                        (?, ?, true), (?, ?, false), (?, ?, false)`, 
+                        [qId, 'The core architecture and implementation details.', qId, 'A completely unrelated topic.', qId, 'General programming history.']
+                    );
+                    quizzesSeeded++;
+                }
+            } catch (eq) { console.warn('Quiz seed failed for video', video.id, eq); }
 
             // 2. Seed Notes
-            const [a] = await db.query("SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE '%wikipedia%'", [video.id]);
-            if ((a as any[]).length === 0) {
-                await db.query(`INSERT INTO attachments (video_id, title, file_url) VALUES 
-                    (?, ?, ?), (?, ?, ?)`, 
-                    [video.id, 'Wikipedia Overview', 'https://en.wikipedia.org/wiki/Portal:Technology', 
-                     video.id, 'Official Documentation', 'https://roadmap.sh/']
-                );
-                notesSeeded++;
-            }
+            try {
+                const [a] = await db.query("SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE '%wikipedia%'", [video.id]);
+                if ((a as any[]).length === 0) {
+                    await db.query(`INSERT INTO attachments (video_id, title, file_url) VALUES 
+                        (?, ?, ?), (?, ?, ?)`, 
+                        [video.id, 'Wikipedia Overview', 'https://en.wikipedia.org/wiki/Portal:Technology', 
+                         video.id, 'Official Documentation', 'https://roadmap.sh/']
+                    );
+                    notesSeeded++;
+                }
+            } catch (ea) { console.warn('Notes seed failed for video', video.id, ea); }
         }
 
         res.json({ success: true, message: `Production Seed Complete. Injected ${quizzesSeeded} quizzes and ${notesSeeded * 2} notes.` });
