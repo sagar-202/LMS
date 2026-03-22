@@ -45,13 +45,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subjects', subjectsRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/progress', progressRoutes);
-app.use('/api', enrollmentRoutes);
+app.use('/api/enrollments', enrollmentRoutes); // Moved under enrollments specifically if needed, or kept at /api
 app.use('/api/system', seedRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/certificates', certificatesRoutes);
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/instructor', instructorRoutes);
-app.use('/api', attachmentsRoutes);
+app.use('/api/attachments', attachmentsRoutes);
 app.use('/api/comments', commentsRoutes);
 
 // 404 Handler
