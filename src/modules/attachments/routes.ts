@@ -5,7 +5,7 @@ import { protect, authorizeRoles } from '../../middleware/authHandler';
 const router = Router();
 
 // List attachments for a specific lesson (accessible to students)
-router.get('/lessons/:id/attachments', protect as any, attachmentsController.getLessonAttachments as any);
+router.get('/videos/:id/attachments', protect as any, attachmentsController.getLessonAttachments as any);
 
 // Add a new attachment (instructor/admin only)
 router.post('/attachments', 

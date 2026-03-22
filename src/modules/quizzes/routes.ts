@@ -8,7 +8,8 @@ const router = Router();
 router.use(protect as any);
 
 // Define routes
-router.get('/:lessonId', quizzesController.getQuizByLessonId as any);
+// Frontend expects /api/quizzes/video/${lessonId}
+router.get('/video/:lessonId', quizzesController.getQuizByLessonId as any);
 router.post('/submit', quizzesController.submitQuiz as any);
 
 export default router;
