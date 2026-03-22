@@ -109,6 +109,7 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
 
     if (!response.ok) {
         const errorText = await response.text().catch(() => '');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let errorData: any = {};
         try {
             errorData = errorText ? JSON.parse(errorText) : {};
@@ -120,6 +121,7 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
 
     // Safe JSON parsing that handles empty bodies
     const text = await response.text();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let result: any = null;
     try {
         result = text ? JSON.parse(text) : null;
