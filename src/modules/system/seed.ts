@@ -37,7 +37,7 @@ router.get('/seed', async (req, res) => {
             }
 
             // 2. Seed Notes
-            const [a] = await db.query('SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE "%wikipedia%"', [video.id]);
+            const [a] = await db.query("SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE '%wikipedia%'", [video.id]);
             if ((a as any[]).length === 0) {
                 await db.query(`INSERT INTO attachments (video_id, title, file_url) VALUES 
                     (?, ?, ?), (?, ?, ?)`, 
