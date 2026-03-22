@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/context/ThemeContext';
 import Button from '@/components/ui/Button';
-import Chatbot from '@/components/features/Chatbot';
 
 interface AppShellProps {
     children: React.ReactNode;
@@ -188,9 +187,6 @@ export default function AppShell({ children }: AppShellProps) {
             <main className="flex-1">
                 {children}
             </main>
-
-            {/* Floating AI Chatbot — only for authenticated users */}
-            {isAuthenticated && <Chatbot />}
         </div>
     );
 }

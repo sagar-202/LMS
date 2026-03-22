@@ -20,6 +20,10 @@ export const metadata: Metadata = {
 
 import AppShell from "@/components/Layout/AppShell";
 import { ThemeProvider } from "@/context/ThemeContext";
+import dynamic from "next/dynamic";
+
+// Loaded client-side only — uses browser APIs and auth store
+const Chatbot = dynamic(() => import("@/components/features/Chatbot"), { ssr: false });
 
 export default function RootLayout({
   children,
@@ -50,6 +54,8 @@ export default function RootLayout({
           <AppShell>
             {children}
           </AppShell>
+          {/* Global floating chatbot — client-only, shown after auth */}
+          <Chatbot />
         </ThemeProvider>
       </body>
     </html>
