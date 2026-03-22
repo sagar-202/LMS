@@ -29,8 +29,9 @@ async function seed() {
         await c.end();
         return;
     }
-    const videoId = videos[0].id; // Use first video for seeding
-    console.log(`\n🎯 Seeding features for video ID: ${videoId} ("${videos[0].title}")\n`);
+    const firstVideo = videos[0];
+    const videoId = firstVideo.id; // Use first video for seeding
+    console.log(`\n🎯 Seeding features for video ID: ${videoId} ("${firstVideo.title}")\n`);
     // 2. Find existing users
     const [users] = await c.query('SELECT id, name, email, role FROM users WHERE email = ?', ['testerfinal@example.com']);
     if (users.length === 0) {

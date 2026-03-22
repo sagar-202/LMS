@@ -15,11 +15,12 @@ export const chatbotController = {
             return;
         }
 
-        const ctx: ChatbotContext = {
-            courseTitle: typeof courseTitle === 'string' ? courseTitle : undefined,
-            lessonTitle: typeof lessonTitle === 'string' ? lessonTitle : undefined,
-            lessonContent: typeof lessonContent === 'string' ? lessonContent : undefined,
-        };
+        // Build context object only with defined string values
+        // (exactOptionalPropertyTypes forbids explicit `undefined` assignment)
+        const ctx: ChatbotContext = {};
+        if (typeof courseTitle === 'string') ctx.courseTitle = courseTitle;
+        if (typeof lessonTitle === 'string') ctx.lessonTitle = lessonTitle;
+        if (typeof lessonContent === 'string') ctx.lessonContent = lessonContent;
 
         try {
             const result = await askChatbot(message.trim(), ctx);

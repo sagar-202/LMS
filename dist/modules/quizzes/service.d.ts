@@ -19,10 +19,13 @@ export declare class QuizzesService {
         questionId: number;
         answerId: number;
     }[]): Promise<{
+        score: number;
+        passed: boolean;
+        attempt_id: number;
         attempt: import("./repository").UserAttempt;
         correctCount: number;
         totalQuestions: number;
-        passingScore: any;
+        passingScore: number;
     }>;
 }
 export declare const quizzesService: QuizzesService;

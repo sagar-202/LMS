@@ -20,6 +20,7 @@ const routes_9 = __importDefault(require("./modules/instructor/routes"));
 const routes_10 = __importDefault(require("./modules/attachments/routes"));
 const routes_11 = __importDefault(require("./modules/comments/routes"));
 const seed_1 = __importDefault(require("./modules/system/seed"));
+const routes_12 = __importDefault(require("./modules/chatbot/routes"));
 const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 // Middleware
@@ -36,14 +37,15 @@ app.use(logger_1.requestLogger);
 app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // Health Check Route
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'UP', message: 'LMS Backend is running', version: 'v1.1.sync-fix-' + Date.now() });
+    res.status(200).json({ status: 'UP', message: 'LMS Backend is running', version: 'v2.0-chatbot-' + Date.now() });
 });
 // Mount Routes
 app.use('/api/auth', routes_1.default);
 app.use('/api/subjects', routes_2.default);
 app.use('/api/videos', routes_3.default);
 app.use('/api/progress', routes_4.default);
-app.use('/api/enrollments', routes_5.default); // Moved under enrollments specifically if needed, or kept at /api
+app.use('/api/enroll', routes_5.default); // Mount for POST /api/enroll/:id
+app.use('/api/enrollments', routes_5.default); // Mount for GET /api/enrollments
 app.use('/api/system', seed_1.default);
 app.use('/api/health', routes_6.default);
 app.use('/api/certificates', routes_7.default);
@@ -51,6 +53,7 @@ app.use('/api/quizzes', routes_8.default);
 app.use('/api/instructor', routes_9.default);
 app.use('/api/attachments', routes_10.default);
 app.use('/api/comments', routes_11.default);
+app.use('/api/chatbot', routes_12.default);
 // 404 Handler
 app.use((req, res, next) => {
     res.status(404).json({ error: 'Not Found', message: `Route ${req.originalUrl} does not exist` });

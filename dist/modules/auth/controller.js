@@ -4,10 +4,11 @@ exports.authController = exports.AuthController = void 0;
 const service_1 = require("./service");
 class AuthController {
     setRefreshCookie(res, refreshToken) {
+        const isProduction = process.env.NODE_ENV === 'production';
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax', // Use 'none' for cross-site prod
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
     }
@@ -85,7 +86,7 @@ class AuthController {
             res.clearCookie('refreshToken', {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
             });
             res.status(200).json({
                 success: true,

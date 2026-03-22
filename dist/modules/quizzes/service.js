@@ -31,7 +31,8 @@ class QuizzesService {
         const questions = await repository_1.quizzesRepository.getQuestionsByQuizId(quizId);
         const questionIds = questions.map(q => q.id);
         const allAnswers = await repository_1.quizzesRepository.getAnswersByQuestionIds(questionIds);
-        const quiz = await require('../../config/db').default.query('SELECT * FROM quizzes WHERE id = ?', [quizId]).then(([rows]) => rows[0]);
+        const quizResult = await require('../../config/db').default.query('SELECT * FROM quizzes WHERE id = ?', [quizId]);
+        const quiz = quizResult[0][0];
         if (!quiz)
             throw { statusCode: 404, message: 'Quiz not found' };
         // 2. Calculate score
@@ -43,7 +44,7 @@ class QuizzesService {
                 correctCount++;
             }
         });
-        const score = Math.round((correctCount / totalQuestions) * 100);
+        const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
         const isPassed = score >= quiz.passing_score;
         // 3. Save attempt
         const attempt = await repository_1.quizzesRepository.saveAttempt(userId, quizId, score, isPassed);
@@ -53,6 +54,9 @@ class QuizzesService {
             await service_1.progressService.updateVideoProgress(userId, quiz.video_id, 0, true);
         }
         return {
+            score,
+            passed: isPassed,
+            attempt_id: attempt.id,
             attempt,
             correctCount,
             totalQuestions,

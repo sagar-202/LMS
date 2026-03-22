@@ -131,8 +131,9 @@ async function runMigrations() {
             console.log(`  ✅ ${m.name}`);
             passed++;
         }
-        catch (err) {
-            if (IGNORED_ERRORS.has(err.code)) {
+        catch (error) {
+            const err = error;
+            if (err.code && IGNORED_ERRORS.has(err.code)) {
                 console.log(`  ⏭️  ${m.name} — already applied, skipping.`);
                 skipped++;
             }

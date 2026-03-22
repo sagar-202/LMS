@@ -61,9 +61,10 @@ router.get('/seed', async (req, res) => {
         }
         res.json({ success: true, message: `Production Seed Complete. Injected ${quizzesSeeded} quizzes and ${notesSeeded * 2} notes.` });
     }
-    catch (err) {
-        console.error('Seed Error:', err);
-        res.status(500).json({ error: err.message });
+    catch (error) {
+        console.error('Seed Error:', error);
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        res.status(500).json({ error: message });
     }
 });
 exports.default = router;
