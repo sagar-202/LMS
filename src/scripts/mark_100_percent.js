@@ -33,9 +33,9 @@ async function maxProgression() {
     // 3. Force 100% completion in DB
     for (const v of videos) {
         await c.query(`
-            INSERT INTO progress (user_id, video_id, completed) 
+            INSERT INTO video_progress (user_id, video_id, is_completed) 
             VALUES (?, ?, true) 
-            ON DUPLICATE KEY UPDATE completed = true
+            ON DUPLICATE KEY UPDATE is_completed = true
         `, [userId, v.id]);
     }
 

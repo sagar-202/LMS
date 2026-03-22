@@ -183,7 +183,7 @@ export const lmsApi = {
 
     // Quiz APIs
     getQuizByLessonId: (lessonId: number | string) =>
-        apiFetch<Quiz | null>(`/quizzes/${lessonId}`),
+        apiFetch<Quiz | null>(`/quizzes/video/${lessonId}`),
 
     submitQuiz: (quizId: number, answers: { questionId: number, answerId: number }[]) =>
         apiFetch<QuizResult>('/quizzes/submit', {
@@ -212,5 +212,5 @@ export const lmsApi = {
 
     // Attachment APIs
     getAttachments: (lessonId: number | string) =>
-        apiFetch<Attachment[]>(`/lessons/${lessonId}/attachments`),
+        apiFetch<Attachment[]>(`/videos/${lessonId}/attachments`),
 };

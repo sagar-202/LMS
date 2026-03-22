@@ -77,7 +77,7 @@ export default function CertificateViewer() {
                             </span>
                         </div>
                         <Button 
-                            href={cert.certificate_url} 
+                            href={cert.certificate_url.startsWith('http') ? cert.certificate_url : `${(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api').replace('/api', '')}${cert.certificate_url.startsWith('/') ? '' : '/'}${cert.certificate_url}`}
                             variant="primary" 
                             size="sm" 
                             className="w-full rounded-xl flex items-center justify-center gap-2 group/btn"

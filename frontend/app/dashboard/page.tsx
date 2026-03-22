@@ -264,6 +264,32 @@ export default function DashboardPage() {
                                             </svg>
                                             Continue Learning
                                         </Link>
+                                        {course.progress?.percent_complete === 100 && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const btn = e.currentTarget;
+                                                    btn.innerText = 'Generating...';
+                                                    btn.disabled = true;
+                                                    lmsApi.generateCertificate(course.id)
+                                                        .then(() => {
+                                                            alert('Certificate generated successfully! Refresh to see it in your Certificates panel.');
+                                                            window.location.reload();
+                                                        })
+                                                        .catch(err => {
+                                                            alert('Failed to generate certificate: ' + err.message);
+                                                            btn.innerText = 'Generate Certificate';
+                                                            btn.disabled = false;
+                                                        });
+                                                }}
+                                                className="w-full mt-3 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl px-6 hover:from-emerald-600 hover:to-teal-700 hover:shadow-lg transition-all duration-200 active:scale-95 text-sm flex items-center gap-2 justify-center"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                                </svg>
+                                                Generate Certificate
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                                 );
