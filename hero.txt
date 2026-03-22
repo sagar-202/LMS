@@ -1,0 +1,11 @@
+Registering test user...
+Enrolling in course 27...
+Fetching course videos...
+Completing video: What is ML
+Completing video: Linear Regression
+Successfully completed 2 videos!
+
+--- BROWSER SUBAGENT TEST ACCOUNT ---
+Email: speedrun_hero_1774157136216@example.com
+Password: password123
+-----------------------------------

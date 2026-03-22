@@ -39,7 +39,7 @@ router.get('/seed', async (req, res) => {
                 quizzesSeeded++;
             }
             // 2. Seed Notes
-            const [a] = await db_1.default.query('SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE "%wikipedia%"', [video.id]);
+            const [a] = await db_1.default.query("SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE '%wikipedia%'", [video.id]);
             if (a.length === 0) {
                 await db_1.default.query(`INSERT INTO attachments (video_id, title, file_url) VALUES 
                     (?, ?, ?), (?, ?, ?)`, [video.id, 'Wikipedia Overview', 'https://en.wikipedia.org/wiki/Portal:Technology',

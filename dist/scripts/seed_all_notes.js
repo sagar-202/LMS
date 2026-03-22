@@ -63,7 +63,7 @@ async function seedAllNotes() {
     await c.query(`DELETE FROM lesson_attachments WHERE file_url LIKE '%WAI/WCAG21/Techniques/pdf/%'`);
     let insertions = 0;
     for (const v of videos) {
-        const resources = RESOURCE_MAP[v.subject_title] || RESOURCE_MAP['default'];
+        const resources = RESOURCE_MAP[v.subject_title] || RESOURCE_MAP['default'] || [];
         // Determine if video already has attachments to prevent duplicating them indefinitely if script is run multiple times
         const [existing] = await c.query('SELECT id FROM lesson_attachments WHERE lesson_id = ?', [v.video_id]);
         if (existing.length === 0) {

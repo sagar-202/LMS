@@ -7,6 +7,7 @@ router.get('/seed', async (req, res) => {
     try {
         // 0. Auto-Migrate Schemas safely
         const schemas = [
+            `CREATE TABLE IF NOT EXISTS video_progress (user_id INT NOT NULL, video_id INT NOT NULL, last_position_seconds INT DEFAULT 0, is_completed BOOLEAN DEFAULT FALSE, completed_at DATETIME NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (user_id, video_id))`,
             `CREATE TABLE IF NOT EXISTS quizzes (id INT AUTO_INCREMENT PRIMARY KEY, video_id INT NOT NULL, title VARCHAR(255) NOT NULL, passing_score INT DEFAULT 70)`,
             `CREATE TABLE IF NOT EXISTS questions (id INT AUTO_INCREMENT PRIMARY KEY, quiz_id INT NOT NULL, question_text TEXT NOT NULL, type VARCHAR(50) DEFAULT 'multiple_choice')`,
             `CREATE TABLE IF NOT EXISTS answers (id INT AUTO_INCREMENT PRIMARY KEY, question_id INT NOT NULL, answer_text TEXT NOT NULL, is_correct BOOLEAN DEFAULT FALSE)`,
