@@ -23,8 +23,8 @@ async function seed() {
     console.log(`\n✅ Connected to ${DB_NAME}\n`);
 
     // 1. Find existing videos
-    const [videos] = await c.query<any[]>('SELECT id, title FROM videos LIMIT 5');
-    console.log('Found videos:', videos.map((v: any) => `[${v.id}] ${v.title}`).join(', '));
+    const [videos] = await c.query<mysql.RowDataPacket[]>('SELECT id, title FROM videos LIMIT 5');
+    console.log('Found videos:', (videos as { id: number; title: string }[]).map((v) => `[${v.id}] ${v.title}`).join(', '));
 
     if (!videos.length) {
         console.log('❌ No videos found. Cannot seed features without videos.');
@@ -32,17 +32,18 @@ async function seed() {
         return;
     }
 
-    const videoId = videos[0].id; // Use first video for seeding
-    console.log(`\n🎯 Seeding features for video ID: ${videoId} ("${videos[0].title}")\n`);
+    const firstVideo = videos[0] as { id: number; title: string };
+    const videoId = firstVideo.id; // Use first video for seeding
+    console.log(`\n🎯 Seeding features for video ID: ${videoId} ("${firstVideo.title}")\n`);
 
     // 2. Find existing users
-    const [users] = await c.query<any[]>('SELECT id, name, email, role FROM users WHERE email = ?', ['testerfinal@example.com']);
+    const [users] = await c.query<mysql.RowDataPacket[]>('SELECT id, name, email, role FROM users WHERE email = ?', ['testerfinal@example.com']);
     if (users.length === 0) {
         console.log('❌ User testerfinal@example.com not found. Please register first.');
         await c.end();
         return;
     }
-    const user = users[0];
+    const user = users[0] as { id: number; name: string; email: string; role: string };
     console.log(`👤 User: [${user.id}] ${user.email} (Role: ${user.role})`);
 
     // 3. Ensure instructor role
@@ -53,7 +54,7 @@ async function seed() {
 
     // 4. Check enrollment for subject 27
     const subjectId = 27;
-    const [enrollments] = await c.query<any[]>('SELECT * FROM enrollments WHERE user_id = ? AND subject_id = ?', [user.id, subjectId]);
+    const [enrollments] = await c.query<mysql.RowDataPacket[]>('SELECT * FROM enrollments WHERE user_id = ? AND subject_id = ?', [user.id, subjectId]);
     if (enrollments.length === 0) {
         await c.query('INSERT INTO enrollments (user_id, subject_id) VALUES (?, ?)', [user.id, subjectId]);
         console.log(`📝 Enrolled ${user.email} in subject ${subjectId}`);
@@ -63,14 +64,14 @@ async function seed() {
 
     // 5. Insert quiz for video 69
     const targetVideoId = 69;
-    const [existing] = await c.query<any[]>('SELECT id FROM quizzes WHERE video_id = ?', [targetVideoId]);
+    const [existing] = await c.query<mysql.RowDataPacket[]>('SELECT id FROM quizzes WHERE video_id = ?', [targetVideoId]);
     let quizId: number;
 
     if (existing.length > 0) {
-        quizId = existing[0].id;
+        quizId = (existing[0] as { id: number }).id;
         console.log(`\n⏭️  Quiz already exists for video ${videoId} (quiz ID: ${quizId}), skipping quiz insert.`);
     } else {
-        const [quizResult] = await c.query<any>(
+        const [quizResult] = await c.query<mysql.ResultSetHeader>(
             'INSERT INTO quizzes (video_id, title, passing_score) VALUES (?, ?, ?)',
             [targetVideoId, 'Quick Knowledge Check', 70]
         );
@@ -109,7 +110,7 @@ async function seed() {
         ];
 
         for (const q of questions) {
-            const [qResult] = await c.query<any>(
+            const [qResult] = await c.query<mysql.ResultSetHeader>(
                 'INSERT INTO questions (quiz_id, question_text) VALUES (?, ?)',
                 [quizId, q.text]
             );

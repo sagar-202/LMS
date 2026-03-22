@@ -23,15 +23,15 @@ router.get('/seed', async (req, res) => {
         let quizzesSeeded = 0;
         let notesSeeded = 0;
 
-        for (const video of videos as any[]) {
+        for (const video of videos as { id: number; section_id: number }[]) {
             // 1. Seed Quizzes
             try {
                 const [q] = await db.query('SELECT id FROM quizzes WHERE video_id = ?', [video.id]);
-                if ((q as any[]).length === 0) {
+                if ((q as unknown[]).length === 0) {
                     const [r] = await db.query('INSERT INTO quizzes (video_id, title) VALUES (?, ?)', [video.id, 'Knowledge Check']);
-                    const quizId = (r as any).insertId;
+                    const quizId = (r as { insertId: number }).insertId;
                     const [rq] = await db.query('INSERT INTO questions (quiz_id, question_text) VALUES (?, ?)', [quizId, 'What is the primary concept discussed in this lesson?']);
-                    const qId = (rq as any).insertId;
+                    const qId = (rq as { insertId: number }).insertId;
                     await db.query(`INSERT INTO answers (question_id, answer_text, is_correct) VALUES 
                         (?, ?, true), (?, ?, false), (?, ?, false)`, 
                         [qId, 'The core architecture and implementation details.', qId, 'A completely unrelated topic.', qId, 'General programming history.']
@@ -43,7 +43,7 @@ router.get('/seed', async (req, res) => {
             // 2. Seed Notes
             try {
                 const [a] = await db.query("SELECT id FROM attachments WHERE video_id = ? AND file_url LIKE '%wikipedia%'", [video.id]);
-                if ((a as any[]).length === 0) {
+                if ((a as unknown[]).length === 0) {
                     await db.query(`INSERT INTO attachments (video_id, title, file_url) VALUES 
                         (?, ?, ?), (?, ?, ?)`, 
                         [video.id, 'Wikipedia Overview', 'https://en.wikipedia.org/wiki/Portal:Technology', 
@@ -55,9 +55,10 @@ router.get('/seed', async (req, res) => {
         }
 
         res.json({ success: true, message: `Production Seed Complete. Injected ${quizzesSeeded} quizzes and ${notesSeeded * 2} notes.` });
-    } catch (err: any) {
-        console.error('Seed Error:', err);
-        res.status(500).json({ error: err.message });
+    } catch (error: unknown) {
+        console.error('Seed Error:', error);
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        res.status(500).json({ error: message });
     }
 });
 

@@ -14,8 +14,7 @@ const onRefreshed = (accessToken: string) => {
     refreshSubscribers = [];
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function apiFetch<T = any>(url: string, options: RequestInit = {}): Promise<T> {
+export async function apiFetch<T = unknown>(url: string, options: RequestInit = {}): Promise<T> {
     const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
 
     const headers = new Headers(options.headers);
@@ -109,20 +108,19 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
 
     if (!response.ok) {
         const errorText = await response.text().catch(() => '');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let errorData: any = {};
+        let errorData: Record<string, unknown> = {};
         try {
             errorData = errorText ? JSON.parse(errorText) : {};
         } catch {
             errorData = { message: `Request failed with status ${response.status}` };
         }
-        throw new Error(errorData.message || 'API request failed');
+        const message = typeof errorData.message === 'string' ? errorData.message : 'API request failed';
+        throw new Error(message);
     }
 
     // Safe JSON parsing that handles empty bodies
     const text = await response.text();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let result: any = null;
+    let result: unknown = null;
     try {
         result = text ? JSON.parse(text) : null;
     } catch {
@@ -138,13 +136,12 @@ export async function apiFetch<T = any>(url: string, options: RequestInit = {}):
     return result as T;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function get<T = any>(url: string): Promise<T> {
+export async function get<T = unknown>(url: string): Promise<T> {
     return apiFetch<T>(url, { method: 'GET' });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function post<T = any>(url: string, body: any): Promise<T> {
+export async function post<T = unknown>(url: string, body: unknown): Promise<T> {
     return apiFetch<T>(url, {
         method: 'POST',
         body: JSON.stringify(body),

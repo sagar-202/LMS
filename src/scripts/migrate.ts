@@ -145,8 +145,9 @@ async function runMigrations() {
             await connection.query(m.sql);
             console.log(`  ✅ ${m.name}`);
             passed++;
-        } catch (err: any) {
-            if (IGNORED_ERRORS.has(err.code)) {
+        } catch (error: unknown) {
+            const err = error as { code?: string; sqlMessage?: string; message?: string };
+            if (err.code && IGNORED_ERRORS.has(err.code)) {
                 console.log(`  ⏭️  ${m.name} — already applied, skipping.`);
                 skipped++;
             } else {

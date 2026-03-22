@@ -32,7 +32,8 @@ export class QuizzesService {
         const questions = await quizzesRepository.getQuestionsByQuizId(quizId);
         const questionIds = questions.map(q => q.id);
         const allAnswers = await quizzesRepository.getAnswersByQuestionIds(questionIds);
-        const quiz = await require('../../config/db').default.query('SELECT * FROM quizzes WHERE id = ?', [quizId]).then(([rows]: any) => rows[0]);
+        const quizResult = await require('../../config/db').default.query('SELECT * FROM quizzes WHERE id = ?', [quizId]) as [{ video_id: number; passing_score: number }[], unknown];
+        const quiz = quizResult[0][0];
 
         if (!quiz) throw { statusCode: 404, message: 'Quiz not found' };
 
