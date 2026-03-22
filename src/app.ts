@@ -15,6 +15,7 @@ import quizzesRoutes from './modules/quizzes/routes';
 import instructorRoutes from './modules/instructor/routes';
 import attachmentsRoutes from './modules/attachments/routes';
 import commentsRoutes from './modules/comments/routes';
+import seedRoutes from './modules/system/seed';
 import path from 'path';
 
 const app: Application = express();
@@ -45,6 +46,7 @@ app.use('/api/subjects', subjectsRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api', enrollmentRoutes);
+app.use('/api/system', seedRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/certificates', certificatesRoutes);
 app.use('/api/quizzes', quizzesRoutes);
