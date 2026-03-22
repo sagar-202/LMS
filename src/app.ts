@@ -37,7 +37,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health Check Route
 app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'UP', message: 'LMS Backend is running' });
+  res.status(200).json({ status: 'UP', message: 'LMS Backend is running', version: 'v1.1.sync-fix-' + Date.now() });
 });
 
 // Mount Routes
