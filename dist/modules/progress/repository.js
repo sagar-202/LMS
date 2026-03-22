@@ -27,8 +27,8 @@ class ProgressRepository {
       VALUES (?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         last_position_seconds = VALUES(last_position_seconds),
-        is_completed = VALUES(is_completed),
-        completed_at = VALUES(completed_at)
+        is_completed = GREATEST(is_completed, VALUES(is_completed)),
+        completed_at = IF(VALUES(is_completed) = 1, VALUES(completed_at), completed_at)
     `;
         await db_1.default.query(query, [userId, videoId, lastPositionSeconds, isCompleted, completedAt]);
     }

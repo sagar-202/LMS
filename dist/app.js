@@ -19,6 +19,7 @@ const routes_8 = __importDefault(require("./modules/quizzes/routes"));
 const routes_9 = __importDefault(require("./modules/instructor/routes"));
 const routes_10 = __importDefault(require("./modules/attachments/routes"));
 const routes_11 = __importDefault(require("./modules/comments/routes"));
+const seed_1 = __importDefault(require("./modules/system/seed"));
 const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 // Middleware
@@ -43,6 +44,7 @@ app.use('/api/subjects', routes_2.default);
 app.use('/api/videos', routes_3.default);
 app.use('/api/progress', routes_4.default);
 app.use('/api', routes_5.default);
+app.use('/api/system', seed_1.default);
 app.use('/api/health', routes_6.default);
 app.use('/api/certificates', routes_7.default);
 app.use('/api/quizzes', routes_8.default);
