@@ -111,12 +111,22 @@ export default function Chatbot() {
                 role: 'ai',
                 text: data.reply || 'Sorry, I didn\'t get a response. Please try again.'
             }]);
-        } catch {
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
-                role: 'ai',
-                text: '⚠️ Something went wrong. Please try again in a moment.'
-            }]);
+        } catch (err: unknown) {
+            let errorText = '⚠️ Something went wrong. Please try again.';
+            if (err instanceof Error) {
+                if (err.message.includes('404') || err.message.includes('Not Found')) {
+                    errorText = '🔌 Chatbot service is not available yet. The server is still deploying — please try again in a minute.';
+                } else if (err.message.includes('401') || err.message.includes('403')) {
+                    errorText = '🔒 Session expired. Please refresh the page and log in again.';
+                } else if (err.message.includes('timed out') || err.message.includes('504')) {
+                    errorText = '⏱️ The AI took too long to respond. Please try again.';
+                } else if (err.message.includes('502')) {
+                    errorText = '🤖 AI model is loading (cold start). Please wait 30 seconds and try again.';
+                } else {
+                    errorText = `⚠️ Error: ${err.message}`;
+                }
+            }
+            setMessages(prev => [...prev, { id: Date.now() + 1, role: 'ai', text: errorText }]);
         } finally {
             setLoading(false);
         }
