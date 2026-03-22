@@ -16,6 +16,7 @@ import instructorRoutes from './modules/instructor/routes';
 import attachmentsRoutes from './modules/attachments/routes';
 import commentsRoutes from './modules/comments/routes';
 import seedRoutes from './modules/system/seed';
+import chatbotRoutes from './modules/chatbot/routes';
 import path from 'path';
 
 const app: Application = express();
@@ -54,6 +55,7 @@ app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/instructor', instructorRoutes);
 app.use('/api/attachments', attachmentsRoutes);
 app.use('/api/comments', commentsRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response, next: NextFunction) => {
