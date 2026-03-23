@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.askChatbot = askChatbot;
 // HuggingFace Inference API — OpenAI-compatible chat completions endpoint
 const HF_BASE_URL = 'https://router.huggingface.co/hf-inference/v1';
-const HF_MODEL = 'mistralai/Mistral-7B-Instruct-v0.2';
-const HF_TIMEOUT_MS = 25_000;
+const HF_MODEL = 'HuggingFaceH4/zephyr-7b-beta'; // reliable, free-tier serverless model
+const HF_TIMEOUT_MS = 30_000;
 /**
  * Build the messages array for the chat completions API.
  */
@@ -15,17 +15,12 @@ function buildMessages(message, ctx) {
                 role: 'system',
                 content: [
                     `You are a dedicated AI tutor for the course "${ctx.courseTitle}", lesson "${ctx.lessonTitle}".`,
-                    `You ONLY help based on the lesson content below.`,
+                    `Answer ONLY based on the lesson content below.`,
                     ``,
-                    `LESSON CONTENT:`,
-                    ctx.lessonContent || '(Use general knowledge about this lesson topic.)',
+                    `LESSON CONTENT: ${ctx.lessonContent || 'Use general knowledge about this topic.'}`,
                     ``,
-                    `STRICT RULES:`,
-                    `1. Answer ONLY based on the lesson content and course context.`,
-                    `2. If the question is outside this lesson, say: "This is outside the current lesson." Then relate it back.`,
-                    `3. Explain step-by-step, use simple language, give course-specific examples.`,
-                    `4. Structure: Explanation → Example → Key takeaway.`,
-                    `5. Be concise. Do NOT say "as an AI".`,
+                    `Rules: Explain step-by-step. Use simple language. Give course-specific examples.`,
+                    `Structure every answer as: Explanation → Example → Key takeaway.`,
                 ].join('\n'),
             },
             { role: 'user', content: message },
@@ -34,7 +29,7 @@ function buildMessages(message, ctx) {
     return [
         {
             role: 'system',
-            content: 'You are a helpful AI assistant for an online Learning Management System called VibeLMS. Answer student questions concisely and clearly.',
+            content: 'You are a helpful AI assistant for VibeLMS, an online Learning Management System. Answer student questions clearly and concisely.',
         },
         { role: 'user', content: message },
     ];
@@ -57,23 +52,31 @@ async function askChatbot(message, ctx = {}) {
             body: JSON.stringify({
                 model: HF_MODEL,
                 messages,
-                max_tokens: 512,
+                max_tokens: 400,
                 temperature: 0.7,
                 stream: false,
             }),
             signal: controller.signal,
         });
+        // Read body once regardless of status
+        const rawText = await response.text().catch(() => '');
         if (!response.ok) {
-            const errorText = await response.text().catch(() => 'Unknown error');
-            throw new Error(`Hugging Face API error [${response.status}]: ${errorText}`);
+            throw new Error(`HF API error [${response.status}]: ${rawText.slice(0, 300)}`);
         }
-        const data = await response.json();
-        const reply = data.choices?.[0]?.message?.content?.trim() ?? '';
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        }
+        catch {
+            throw new Error(`HF API returned non-JSON response: ${rawText.slice(0, 200)}`);
+        }
+        const parsed = data;
+        const reply = parsed.choices?.[0]?.message?.content?.trim() ?? '';
         return { reply: reply || 'No response generated.' };
     }
     catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
-            throw new Error('Chatbot request timed out. Please try again.');
+            throw new Error('Request timed out — the AI model took too long. Please try again.');
         }
         throw error;
     }
