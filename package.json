@@ -6,7 +6,6 @@
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "tsc": "tsc",
     "seed": "ts-node scripts/seed.ts",
     "migrate": "ts-node src/scripts/migrate.ts",
     "seed:features": "ts-node src/scripts/seed_features.ts"
