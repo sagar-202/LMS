@@ -53,7 +53,7 @@ export default function AppShell({ children }: AppShellProps) {
 
     return (
         <div className="flex flex-col min-h-screen font-sans transition-colors duration-300 bg-white dark:bg-gray-900">
-            <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/60 dark:bg-gray-900/60 border-b border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-300">
+            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/70 dark:bg-gray-950/70 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                     <div className="flex justify-between items-center h-20">
                         {/* Brand / Logo */}
