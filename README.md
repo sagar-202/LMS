@@ -8,6 +8,11 @@ LMS is a comprehensive platform that empowers instructors to create and manage c
 
 ## Key Features
 
+- **Premium SaaS UI/UX**:
+  - Stunning modern aesthetics with **glassmorphism** in the navigation.
+  - 60+ FPS smooth animations and micro-interactions.
+  - Responsive layouts optimized for all screen sizes.
+  - Adaptive Dark/Light modes with seamless transitions.
 - **User Authentication**: Secure login and registration using JWT (Access & Refresh tokens) with HTTP-only cookies.
 - **Role-Based Access Control (RBAC)**: Distinct interfaces and permissions for Students and Instructors.
 - **Course & Lesson Management**: Comprehensive CMS for instructors to create courses, upload video lessons, and manage attachments.
@@ -42,7 +47,7 @@ LMS is a comprehensive platform that empowers instructors to create and manage c
 
 The project follows a modular monolithic architecture:
 - **Frontend**: A client-side application using Next.js for server-side rendering and static site generation, ensuring SEO and performance.
-- **Backend**: A RESTful API built with Express.js, organized into feature-based modules (Auth, Courses, Lessons, etc.).
+- **Backend**: A RESTful API built with Express.js, organized into feature-based modules.
 - **Database**: A relational MySQL database for structured data persistence.
 
 ## Folder Structure
@@ -54,9 +59,7 @@ The project follows a modular monolithic architecture:
 │   ├── modules/       # Feature-based business logic (auth, courses, etc.)
 │   ├── middleware/    # Auth and error handling middlewares
 │   ├── utils/         # Database connection, PDF generators, etc.
-│   ├── scripts/       # Database migrations and seeding
-│   ├── app.ts         # Express app initialization
-│   └── server.ts      # Server entry point
+│   ├── server.ts      # Server entry point
 ├── scripts/           # Root-level support scripts
 └── .env               # Backend configuration
 ```
@@ -65,12 +68,7 @@ The project follows a modular monolithic architecture:
 ```text
 /frontend/
 ├── app/               # Next.js App Router (pages and layouts)
-│   ├── auth/          # Authentication pages
-│   ├── courses/       # Course browsing
-│   ├── dashboard/     # Student/Instructor dashboard
-│   └── lesson/        # Video player and lesson content
 ├── components/        # Reusable UI components
-├── context/           # React Context providers (Theme, etc.)
 ├── store/             # Zustand stores for global state
 └── tailwind.config.ts # Styling configuration
 ```
@@ -91,17 +89,28 @@ The project follows a modular monolithic architecture:
 2. **Backend Setup**:
    ```bash
    npm install
-   # Configure .env file (see Environment Variables)
-   npm run migrate      # Run database migrations
-   npm run seed:features # Seed initial data
+   npm run build
+   # Configure .env file
+   npm run migrate
+   npm run seed:features
    ```
 
 3. **Frontend Setup**:
    ```bash
    cd frontend
    npm install
-   # Configure .env.local file
+   npm run dev
    ```
+
+## Deployment
+
+### Render Configuration
+To deploy the backend on Render, use the following settings:
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm start`
+- **Environment**: Node
+
+Ensure all Environment Variables are configured in the Render dashboard.
 
 ## Environment Variables
 
@@ -121,33 +130,21 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 
 ## Running Locally
 
-1. **Start Backend**:
-   ```bash
-   npm run dev
-   ```
-
-2. **Start Frontend**:
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+1. **Start Backend**: `npm run dev`
+2. **Start Frontend**: `cd frontend && npm run dev`
 
 ## API Reference (Summary)
 
-- `POST /api/auth/register` - Create a new user account
 - `POST /api/auth/login` - Authenticate and receive tokens
 - `GET /api/courses` - Fetch all available courses
-- `POST /api/courses` - Create a new course (Instructor only)
-- `GET /api/lessons/:id` - Get lesson details and attachments
-- `POST /api/progress/track` - Update user progress for a lesson
+- `POST /api/progress/track` - Update user progress
 - `POST /api/chatbot` - Interact with the AI assistant
 
 ## Future Improvements
 
-- Implementation of a payment gateway (Stripe/Razorpay) for paid courses.
-- Live streaming integration for real-time classes.
-- Mobile application using React Native.
-- Advanced analytics dashboard for instructors.
+- Stripe/Razorpay payment integration.
+- Live streaming for real-time classes.
+- Native mobile application (React Native).
 
 ## License
 
