@@ -1,120 +1,134 @@
 # LMS - Learning Management System
 
-A professional, full-stack learning management system designed for seamless course delivery, progress tracking, and interactive learning.
+[![License](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/frontend-Next.js%2014-black)](https://nextjs.org/)
+[![Express.js](https://img.shields.io/badge/backend-Express.js%205-lightgrey)](https://expressjs.com/)
+[![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)](https://www.typescriptlang.org/)
 
-## Overview
+A professional, full-stack learning management system designed for seamless course delivery, student progress tracking, and interactive learning. Built with a focus on modern SaaS aesthetics and scalable architecture.
 
-LMS is a comprehensive platform that empowers instructors to create and manage courses while providing students with an engaging learning experience. Built with a modern tech stack, it features role-based access control, a robust quiz system, automated certificate generation, and an AI-powered chatbot for real-time assistance.
+## 📖 Table of Contents
 
-## Key Features
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
+- [Folder Structure](#folder-structure)
+- [Getting Started](#getting-started)
+- [Environment Configuration](#environment-configuration)
+- [API Reference](#api-reference)
+- [Deployment](#deployment)
+- [Future Roadmap](#future-roadmap)
+- [License](#license)
 
-- **Premium SaaS UI/UX**:
-  - Stunning modern aesthetics with **glassmorphism** in the navigation.
-  - 60+ FPS smooth animations and micro-interactions.
-  - Responsive layouts optimized for all screen sizes.
-  - Adaptive Dark/Light modes with seamless transitions.
-- **User Authentication**: Secure login and registration using JWT (Access & Refresh tokens) with HTTP-only cookies.
-- **Role-Based Access Control (RBAC)**: Distinct interfaces and permissions for Students and Instructors.
-- **Course & Lesson Management**: Comprehensive CMS for instructors to create courses, upload video lessons, and manage attachments.
-- **Interactive Learning**:
-  - Video-based lessons with progress tracking.
-  - Discussion and comment system for each lesson.
-  - Downloadable lesson attachments.
-- **Assessment & Certification**:
-  - Dynamic quiz system to test student knowledge.
-  - Automated PDF certificate generation upon course completion.
-- **AI Chatbot**: Intelligent, LMS-aware assistant integrated via Hugging Face API.
-- **State Management**: Optimized client-side state handling with Zustand.
+---
 
-## Tech Stack
+## 🌟 Overview
 
-### Frontend
-- **Framework**: Next.js (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Icons**: Lucide React
+LMS is a comprehensive platform empowering instructors to create high-quality educational content while providing students with an immersive learning experience. Featuring role-based access control, automated certifications, and AI-driven support, it is built to handle the demands of modern online education.
 
-### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: MySQL
-- **Authentication**: JWT, bcrypt
-- **Documentation/Utilities**: PDFKit (Certificates), Dotenv
+## ✨ Key Features
 
-## Architecture Overview
+### 🎨 Premium UI/UX
+- **Modern Aesthetics**: Glassmorphism effects and 60+ FPS micro-interactions.
+- **Adaptive Display**: Fully responsive design with seamless dark/light mode transitions.
+- **Optimized Performance**: Built with Next.js App Router for superior speed and SEO.
 
-The project follows a modular monolithic architecture:
-- **Frontend**: A client-side application using Next.js for server-side rendering and static site generation, ensuring SEO and performance.
-- **Backend**: A RESTful API built with Express.js, organized into feature-based modules.
-- **Database**: A relational MySQL database for structured data persistence.
+### 🎓 Learning Experience
+- **Interactive Lessons**: High-quality video playback with precise progress tracking.
+- **Discussion System**: Integrated comment threads for collaborative learning.
+- **Resource Management**: Downloadable attachments for every lesson.
+- **AI Support**: Intelligent, context-aware chatbot powered by Hugging Face API.
 
-## Folder Structure
+### 🛠 Instructor Tools
+- **Course CMS**: Effortless creation and management of courses and lessons.
+- **Student Insights**: Track enrollment and progress across your curriculum.
+- **Automated Certifications**: Dynamic PDF generation upon course completion.
 
-### Backend
+### 🔐 Security & State
+- **Secure Auth**: JWT-based authentication with Access/Refresh tokens and HTTP-only cookies.
+- **Efficient State**: Lightweight global state management using Zustand.
+
+---
+
+## 💻 Tech Stack
+
+| Frontend | Backend | DevOps & DB |
+| :--- | :--- | :--- |
+| Next.js 14 (App Router) | Node.js & Express.js | MySQL |
+| TypeScript | TypeScript | Git & GitHub |
+| Tailwind CSS | PDFKit (Certificates) | Render (Deployment) |
+| Zustand (State) | JWT & bcrypt | Dotenv |
+
+---
+
+## 🏗 Architecture Overview
+
+The system follows a **Modular Monolithic** design:
+1. **Frontend**: A high-performance SSR/SSG application handling the student and instructor portals.
+2. **Backend**: A RESTful API layer organized into feature-based modules (Auth, Courses, Progress, etc.).
+3. **Storage**: Relational data persistence using MySQL for structured educational data.
+
+---
+
+## 📂 Folder Structure
+
+### Backend (`/`)
 ```text
-/
 ├── src/
-│   ├── modules/       # Feature-based business logic (auth, courses, etc.)
-│   ├── middleware/    # Auth and error handling middlewares
-│   ├── utils/         # Database connection, PDF generators, etc.
-│   ├── server.ts      # Server entry point
-├── scripts/           # Root-level support scripts
-└── .env               # Backend configuration
+│   ├── modules/       # Feature-based business logic
+│   ├── middleware/    # Auth and error handlers
+│   ├── utils/         # Database and file utilities
+│   └── server.ts      # API entry point
+├── scripts/           # Migration and seeding tools
+└── .env               # Configuration
 ```
 
-### Frontend
+### Frontend (`/frontend`)
 ```text
-/frontend/
-├── app/               # Next.js App Router (pages and layouts)
+├── app/               # App Router pages
 ├── components/        # Reusable UI components
-├── store/             # Zustand stores for global state
+├── store/             # Zustand state stores
 └── tailwind.config.ts # Styling configuration
 ```
 
-## Installation & Setup
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
 - MySQL instance
 
-### Steps
-1. **Clone the repository**:
+### Installation
+
+1. **Clone & Install Backend**
    ```bash
    git clone <repository-url>
    cd 5.Learning Management System
-   ```
-
-2. **Backend Setup**:
-   ```bash
    npm install
    npm run build
-   # Configure .env file
+   ```
+
+2. **Database Setup**
+   ```bash
+   # Create a .env file and configure your DB details
    npm run migrate
    npm run seed:features
    ```
 
-3. **Frontend Setup**:
+3. **Frontend Setup**
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
 
-## Deployment
+---
 
-### Render Configuration
-To deploy the backend on Render, use the following settings:
-- **Build Command**: `npm install && npm run build`
-- **Start Command**: `npm start`
-- **Environment**: Node
+## ⚙️ Environment Configuration
 
-Ensure all Environment Variables are configured in the Render dashboard.
-
-## Environment Variables
-
-### Backend (.env)
+### Backend (`.env`)
 ```env
 PORT=3000
 DATABASE_URL=mysql://user:password@host:port/dbname
@@ -123,29 +137,41 @@ JWT_REFRESH_SECRET=your_refresh_secret
 HF_API_KEY=your_huggingface_api_key
 ```
 
-### Frontend (frontend/.env.local)
+### Frontend (`frontend/.env.local`)
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 ```
 
-## Running Locally
+---
 
-1. **Start Backend**: `npm run dev`
-2. **Start Frontend**: `cd frontend && npm run dev`
+## 🔌 API Reference (Summary)
 
-## API Reference (Summary)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | User authentication |
+| `GET` | `/api/courses` | List all courses |
+| `POST` | `/api/progress/track` | Update lesson completion |
+| `POST` | `/api/chatbot` | AI Assistant interaction |
 
-- `POST /api/auth/login` - Authenticate and receive tokens
-- `GET /api/courses` - Fetch all available courses
-- `POST /api/progress/track` - Update user progress
-- `POST /api/chatbot` - Interact with the AI assistant
+---
 
-## Future Improvements
+## 🌐 Deployment
 
-- Stripe/Razorpay payment integration.
-- Live streaming for real-time classes.
-- Native mobile application (React Native).
+### Render (Backend)
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm start`
+- **Environment Settings**: Add all secret keys in the "Environment" tab.
 
-## License
+---
 
-This project is licensed under the ISC License.
+## 🗺 Future Roadmap
+
+- [ ] Stripe/Razorpay payment gateway integration.
+- [ ] Real-time live streaming classrooms.
+- [ ] Mobile app (React Native) for iOS and Android.
+
+---
+
+## 📄 License
+
+This project is licensed under the **ISC License**.
