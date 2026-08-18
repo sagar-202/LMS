@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "public": true,
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
@@ -9,3 +8,4 @@
     "NEXT_PUBLIC_API_BASE_URL": "https://lms-jd7r.onrender.com/api"
   }
 }
+
