@@ -26,3 +26,6 @@ services:
         sync: false
       - key: DB_PORT
         sync: false
+      - key: HF_API_KEY
+        sync: false
+

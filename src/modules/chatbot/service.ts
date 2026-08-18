@@ -1,6 +1,7 @@
-// HuggingFace Router — featherless-ai provider (OpenAI-compatible, confirmed working)
-const HF_API_URL = 'https://router.huggingface.co/featherless-ai/v1/chat/completions';
-const HF_MODEL = 'mistralai/Mistral-7B-Instruct-v0.3';
+// HuggingFace Inference Router (OpenAI-compatible)
+const HF_API_URL = 'https://router.huggingface.co/v1/chat/completions';
+const PRIMARY_MODEL = 'meta-llama/Llama-3.1-8B-Instruct';
+const FALLBACK_MODEL = 'Qwen/Qwen2.5-72B-Instruct';
 const HF_TIMEOUT_MS = 30_000;
 
 export interface ChatbotContext {
@@ -24,9 +25,12 @@ function buildMessages(message: string, ctx: ChatbotContext): HFMessage[] {
             {
                 role: 'system',
                 content: [
-                    `You are a dedicated AI tutor for the course "${ctx.courseTitle}", lesson "${ctx.lessonTitle}".`,
-                    `LESSON CONTENT: ${ctx.lessonContent || 'Use general knowledge about this topic.'}`,
-                    `Rules: Explain step-by-step. Use simple language. Structure: Explanation → Example → Key takeaway.`,
+                    `You are an educational assistant inside this LMS.`,
+                    `Use the supplied course and lesson context to help the student understand the material.`,
+                    `Course: ${ctx.courseTitle}`,
+                    `Lesson: ${ctx.lessonTitle}`,
+                    `Context: ${ctx.lessonContent || 'General lesson topic'}`,
+                    `Answer clearly and practically. If the question is related to the lesson, explain it using the lesson context. If the question is unrelated, explain that it is outside the current lesson and redirect the student toward the course topic. Do not fabricate information that is not supported by the supplied context. Use examples when useful. Keep the response concise unless the student asks for more detail.`,
                 ].join('\n'),
             },
             { role: 'user', content: message },
@@ -35,18 +39,13 @@ function buildMessages(message: string, ctx: ChatbotContext): HFMessage[] {
     return [
         {
             role: 'system',
-            content: 'You are a helpful AI tutor for VibeLMS, an online Learning Management System. Answer student questions clearly and concisely.',
+            content: 'You are an educational assistant inside this LMS. Answer student questions clearly and concisely using practical examples.',
         },
         { role: 'user', content: message },
     ];
 }
 
-export async function askChatbot(message: string, ctx: ChatbotContext = {}): Promise<ChatbotReply> {
-    const apiKey = process.env.HF_API_KEY;
-    if (!apiKey) {
-        throw new Error('HF_API_KEY is not configured on this server.');
-    }
-
+async function fetchFromHF(model: string, apiKey: string, messages: HFMessage[]): Promise<string> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), HF_TIMEOUT_MS);
 
@@ -58,8 +57,8 @@ export async function askChatbot(message: string, ctx: ChatbotContext = {}): Pro
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: HF_MODEL,
-                messages: buildMessages(message, ctx),
+                model,
+                messages,
                 max_tokens: 400,
                 temperature: 0.7,
                 stream: false,
@@ -82,14 +81,34 @@ export async function askChatbot(message: string, ctx: ChatbotContext = {}): Pro
 
         const parsed = data as { choices?: Array<{ message?: { content?: string } }> };
         const reply = parsed.choices?.[0]?.message?.content?.trim() ?? '';
-        return { reply: reply || 'No response generated.' };
-
-    } catch (error: unknown) {
-        if (error instanceof Error && error.name === 'AbortError') {
-            throw new Error('Request timed out — please try again.');
-        }
-        throw error;
+        return reply;
     } finally {
         clearTimeout(timeout);
     }
 }
+
+export async function askChatbot(message: string, ctx: ChatbotContext = {}): Promise<ChatbotReply> {
+    const apiKey = process.env.HF_API_KEY;
+    if (!apiKey) {
+        throw new Error('HF_API_KEY is not configured on this server.');
+    }
+
+    const messages = buildMessages(message, ctx);
+
+    try {
+        const reply = await fetchFromHF(PRIMARY_MODEL, apiKey, messages);
+        return { reply: reply || 'No response generated.' };
+    } catch (primaryError) {
+        console.warn(`Primary model (${PRIMARY_MODEL}) failed:`, primaryError instanceof Error ? primaryError.message : primaryError);
+        try {
+            const fallbackReply = await fetchFromHF(FALLBACK_MODEL, apiKey, messages);
+            return { reply: fallbackReply || 'No response generated.' };
+        } catch (fallbackError) {
+            if (primaryError instanceof Error && primaryError.name === 'AbortError') {
+                throw new Error('Request timed out — please try again.');
+            }
+            throw primaryError;
+        }
+    }
+}
+
